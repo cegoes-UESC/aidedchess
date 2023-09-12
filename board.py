@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 from pathlib import Path
 
@@ -14,7 +15,10 @@ images = [cv.imread(str(path / image)) for image in images]
 
 class ImageCanny:
     # low, high = 360, 360
-    low, high = 0, 500
+    #low, high = 0, 500
+    #low, high = 120, 200
+    #low, high = 200, 300
+    low, high = 100, 400
 
     def setLow(self, l):
         self.low = l
@@ -55,10 +59,11 @@ cv.createTrackbar("th", "tracks", H.th, 500, H.setTh)
 
 imgs = []
 
-for image in images:
-    i = cv.GaussianBlur(image, (9, 9), 0)
-    resized = cv.resize(i, (500, 500))
-    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+for index, image in enumerate(images):
+    resized = cv.resize(image, (500, 500))
+    blur = cv.GaussianBlur(resized, (3, 3), 9)
+    cv.imshow('pre_' + str(index), blur)
+    gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
     imgs.append(
         {
             "original": resized.copy(),
@@ -67,6 +72,7 @@ for image in images:
         }
     )
 
+cv.waitKey(0)
 
 def getColor(degree):
     if degree <= 90:
@@ -96,7 +102,7 @@ hough = []
 once = 1
 
 while once == 1:
-    once = 0
+    # once = 0
     for index, images in enumerate(imgs):
         original = images.get("resize").copy()
 
@@ -110,6 +116,7 @@ while once == 1:
         # )
 
         dataset = []
+        lll = np.empty((0, 2), dtype=np.float32)
 
         if lines is not None:
             r = []
@@ -118,6 +125,8 @@ while once == 1:
             y = []
             for line in lines:
                 rho, theta = line[0]
+                lll = np.append(lll, [[rho, theta]], axis=0)
+
                 r.append(rho)
                 t.append(theta)
                 a = np.cos(theta)
@@ -128,56 +137,55 @@ while once == 1:
                 x.append(x0)
                 y.append(y0)
 
-                # x1 = int(x0 + 1000 * (-b))
-                # y1 = int(y0 + 1000 * (a))
-                # x2 = int(x0 - 1000 * (-b))
-                # y2 = int(y0 - 1000 * (a))
+                x1 = int(x0 + 1000 * (-b))
+                y1 = int(y0 + 1000 * (a))
+                x2 = int(x0 - 1000 * (-b))
+                y2 = int(y0 - 1000 * (a))
+
+                if rho > 0:
+                    cv.line(original, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                else:
+                    cv.line(original, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
                 # cv.circle(original, (int(x0), int(y0)), 1, (255, 0, 255), 2)
 
-                # if index == 0:
-                #     if theta >= 2.949606:
-                #         c = (0, 0, 255)
-                #     else:
-                #         c = (255, 0, 0)
+            # compac, labels, centers = cv.kmeans(lll, 3, criteria=(cv.TERM_CRITERIA_MAX_ITER+cv.TermCriteria_EPS, 20, 1), bestLabels=None, attempts=10, flags=cv.KMEANS_RANDOM_CENTERS)
+            # lines1 = lll[labels.ravel() == 0]
+            # lines2 = lll[labels.ravel() == 1]
+            # lines3 = lll[labels.ravel() == 2]
+            lines1, lines2, centers = [], [], []
+            # print(lines3)
+            hough.append({"rho": r, "theta": t, "x": x, "y": y, "radon": [], 'A': lines1, 'B': lines2, 'center': centers})
 
-                # if index == 1:
-                #     if theta >= 2.513274:
-                #         c = (0, 0, 255)
-                #     else:
-                #         c = (255, 0, 0)
-                # cv.line(original, (x1, y1), (x2, y2), c, 1)
+            # # # lines1, lines2 = splitLinesGroups(dt)
+            # for row in lines1:
+            #     a = np.cos(row[1])
+            #     b = np.sin(row[1])
+            #     x = a * row[0]
+            #     y = b * row[0]
+            #     x1 = int(x + 1000 * (-b))
+            #     y1 = int(y + 1000 * (a))
+            #     x2 = int(x - 1000 * (-b))
+            #     y2 = int(y - 1000 * (a))
 
-            hough.append({"rho": r, "theta": t, "x": x, "y": y, "radon": []})
-            dt = pd.DataFrame({"rho": r, "theta": t, "x": x, "y": y})
-            dt = dt.sort_values(by=["theta", "rho"])
-            lines1, lines2 = splitLinesGroups(dt)
-            for row in lines1.itertuples():
-                a = np.cos(row.theta)
-                b = np.sin(row.theta)
-                x1 = int(row.x + 1000 * (-b))
-                y1 = int(row.y + 1000 * (a))
-                x2 = int(row.x - 1000 * (-b))
-                y2 = int(row.y - 1000 * (a))
+            #     cv.line(original, (x1, y1), (x2, y2), (0, 0, 255), 1)
 
-                cv.line(original, (x1, y1), (x2, y2), (0, 0, 255), 1)
+            # for row in lines2:
+            #     a = np.cos(row[1])
+            #     b = np.sin(row[1])
+            #     x = a * row[0]
+            #     y = b * row[0]
+            #     x1 = int(x + 1000 * (-b))
+            #     y1 = int(y + 1000 * (a))
+            #     x2 = int(x - 1000 * (-b))
+            #     y2 = int(y - 1000 * (a))
 
-                # cv.circle(original, (int(row.x), int(row.y)), 1, (0, 0, 255), 2)
-
-            for row in lines2.itertuples():
-                a = np.cos(row.theta)
-                b = np.sin(row.theta)
-                x1 = int(row.x + 1000 * (-b))
-                y1 = int(row.y + 1000 * (a))
-                x2 = int(row.x - 1000 * (-b))
-                y2 = int(row.y - 1000 * (a))
-
-                cv.line(original, (x1, y1), (x2, y2), (255, 0, 255), 1)
+            #     cv.line(original, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
         cv.imshow("chess_" + str(index), edges)
         cv.imshow("chessboard_" + str(index), original)
 
-    if cv.waitKey(50) == ord("q"):
+    if cv.waitKey(10) == ord("q"):
         break
 
 
@@ -198,7 +206,18 @@ for index, h in enumerate(hough):
 
     s = sorted(theta)
     dd = [getDegree(t) for t in theta]
-    plt.scatter(theta, rho, color=(1, 0, 0, 0.5))
+    plt.figure()
+    sns.scatterplot(x=theta, y=rho, color=(1, 0, 0, 0.5))
+
+    c = h.get('center')
+    sns.scatterplot(x=c[:,1], y=c[:,0])
+
+    # A =h.get('A')
+    # plt.figure()
+    # sns.scatterplot(x=A[:, 1], y=A[:, 0])
+    # B =h.get('B')
+    # plt.figure()
+    # sns.scatterplot(x=B[:, 1], y=B[:, 0])
 
     # radon = h.get("radon")
     # cv.imshow("radon_" + str(index), radon)
@@ -206,3 +225,5 @@ for index, h in enumerate(hough):
 
 plt.show(block=False)
 cv.waitKey(0)
+plt.close('all')
+cv.destroyAllWindows()
