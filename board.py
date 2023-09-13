@@ -1,229 +1,110 @@
+from pathlib import Path
+
 import cv2 as cv
 import numpy as np
-import pandas as pd
-
-from matplotlib import pyplot as plt
-import seaborn as sns
-
-from pathlib import Path
 
 path = Path("resources")
 
-images = ["chess_1.jpg", "chess_2.jpeg"]
-images = [cv.imread(str(path / image)) for image in images]
+image = "chess_2.jpeg"
+
+image = cv.imread(str(path / image), cv.IMREAD_COLOR)
+
+resize = cv.resize(image, (500, 500))
+gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
+blur = cv.GaussianBlur(gray, (3, 3), 3)
+edges = cv.Canny(blur, 100, 200)
+lines = cv.HoughLinesWithAccumulator(edges, 1, np.pi/180, 80)
+
+h, v = [],[]
+
+def poi(x1, y1, x2, y2, x3,y3,x4,y4):
+    px = (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4)
+    py = (x1*y2-y1*x2)*(y3-y4) - (y1-y2)*(x3*y4-y3*x4)
+
+    den = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4)
+    if den == 0:
+        return None
+    
+    return (px/den, py/den)
+
+def getLineCoords(rho, theta):
+    a = np.cos(theta)
+    b = np.sin(theta)
+    x0 = a * rho
+    y0 = b * rho
+
+    x1 = int(x0 + 3000 * (-b))
+    y1 = int(y0 + 3000 * (a))
+    x2 = int(x0 - 3000 * (-b))
+    y2 = int(y0 - 3000 * (a))
+
+    return (x1,y1), (x2,y2)
 
 
-class ImageCanny:
-    # low, high = 360, 360
-    #low, high = 0, 500
-    #low, high = 120, 200
-    #low, high = 200, 300
-    low, high = 100, 400
+def getBestLines(lines, th = 15):
 
-    def setLow(self, l):
-        self.low = l
+    bestLines = []
+    bestLines.append(lines[0])
+    del lines[0]
 
-    def setHigh(self, h):
-        self.high = h
+    for l in lines:
 
+        rho, theta, acc = l
+        it = bestLines.copy()
 
-class ImageHough:
-    # rho, theta, th = 1, 1, 85
-    rho, theta, th = 1, 1, 100
+        add = True
 
-    def setRho(self, r):
-        if r <= 0:
-            r = 1
-        self.rho = r
+        for index, line in enumerate(it):
+            rho1, theta1, acc1 = line
 
-    def setTheta(self, theta):
-        self.theta = theta * (np.pi / 180)
+            dist = np.sqrt(np.power((rho-rho1)+(theta-theta1),2))
 
-    def setTh(self, th):
-        self.th = th
+            if dist < th:
 
-
-cv.namedWindow("chessboard_0")
-cv.namedWindow("chessboard_1")
-cv.namedWindow("tracks")
-
-C = ImageCanny()
-H = ImageHough()
-
-cv.createTrackbar("low_canny", "tracks", C.low, 1000, C.setLow)
-cv.createTrackbar("high_canny", "tracks", C.high, 1000, C.setHigh)
-
-cv.createTrackbar("rho", "tracks", H.rho, 50, H.setRho)
-cv.createTrackbar("theta", "tracks", H.theta, 360, H.setTheta)
-cv.createTrackbar("th", "tracks", H.th, 500, H.setTh)
-
-imgs = []
-
-for index, image in enumerate(images):
-    resized = cv.resize(image, (500, 500))
-    blur = cv.GaussianBlur(resized, (3, 3), 9)
-    cv.imshow('pre_' + str(index), blur)
-    gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-    imgs.append(
-        {
-            "original": resized.copy(),
-            "resize": resized,
-            "gray": gray,
-        }
-    )
-
-cv.waitKey(0)
-
-def getColor(degree):
-    if degree <= 90:
-        return (255, 0, 0)
-
-    if degree <= 180:
-        return (0, 255, 0)
-
-    return (0, 0, 255)
-
-
-def getDegree(theta):
-    return theta * (180 / np.pi)
-
-
-def splitLinesGroups(dataframe):
-    dif = dataframe.diff()
-    idx = dif.theta.idxmax()
-    middleTheta = dataframe[dataframe.index == idx].iloc[0].theta
-    return (
-        dataframe[dataframe.theta < middleTheta],
-        dataframe[dataframe.theta >= middleTheta],
-    )
-
-
-hough = []
-once = 1
-
-while once == 1:
-    # once = 0
-    for index, images in enumerate(imgs):
-        original = images.get("resize").copy()
-
-        gray_resized = images.get("gray").copy()
-
-        edges = cv.Canny(gray_resized, C.low, C.high)
-        lines = cv.HoughLines(edges, H.rho, H.theta, H.th)
-
-        # radon = cv.ximgproc.RadonTransform(
-        #     edges, theta=1, start_angle=0, end_angle=360, norm=True
-        # )
-
-        dataset = []
-        lll = np.empty((0, 2), dtype=np.float32)
-
-        if lines is not None:
-            r = []
-            t = []
-            x = []
-            y = []
-            for line in lines:
-                rho, theta = line[0]
-                lll = np.append(lll, [[rho, theta]], axis=0)
-
-                r.append(rho)
-                t.append(theta)
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a * rho
-                y0 = b * rho
-
-                x.append(x0)
-                y.append(y0)
-
-                x1 = int(x0 + 1000 * (-b))
-                y1 = int(y0 + 1000 * (a))
-                x2 = int(x0 - 1000 * (-b))
-                y2 = int(y0 - 1000 * (a))
-
-                if rho > 0:
-                    cv.line(original, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                if acc > acc1:
+                    del bestLines[index]
                 else:
-                    cv.line(original, (x1, y1), (x2, y2), (255, 0, 0), 1)
+                    add = False
+                    break
+        if add == True:
+            bestLines.append(l)
+    return bestLines
 
-                # cv.circle(original, (int(x0), int(y0)), 1, (255, 0, 255), 2)
-
-            # compac, labels, centers = cv.kmeans(lll, 3, criteria=(cv.TERM_CRITERIA_MAX_ITER+cv.TermCriteria_EPS, 20, 1), bestLabels=None, attempts=10, flags=cv.KMEANS_RANDOM_CENTERS)
-            # lines1 = lll[labels.ravel() == 0]
-            # lines2 = lll[labels.ravel() == 1]
-            # lines3 = lll[labels.ravel() == 2]
-            lines1, lines2, centers = [], [], []
-            # print(lines3)
-            hough.append({"rho": r, "theta": t, "x": x, "y": y, "radon": [], 'A': lines1, 'B': lines2, 'center': centers})
-
-            # # # lines1, lines2 = splitLinesGroups(dt)
-            # for row in lines1:
-            #     a = np.cos(row[1])
-            #     b = np.sin(row[1])
-            #     x = a * row[0]
-            #     y = b * row[0]
-            #     x1 = int(x + 1000 * (-b))
-            #     y1 = int(y + 1000 * (a))
-            #     x2 = int(x - 1000 * (-b))
-            #     y2 = int(y - 1000 * (a))
-
-            #     cv.line(original, (x1, y1), (x2, y2), (0, 0, 255), 1)
-
-            # for row in lines2:
-            #     a = np.cos(row[1])
-            #     b = np.sin(row[1])
-            #     x = a * row[0]
-            #     y = b * row[0]
-            #     x1 = int(x + 1000 * (-b))
-            #     y1 = int(y + 1000 * (a))
-            #     x2 = int(x - 1000 * (-b))
-            #     y2 = int(y - 1000 * (a))
-
-            #     cv.line(original, (x1, y1), (x2, y2), (255, 0, 0), 1)
-
-        cv.imshow("chess_" + str(index), edges)
-        cv.imshow("chessboard_" + str(index), original)
-
-    if cv.waitKey(10) == ord("q"):
-        break
+def printLines(lines, image, c):
+    for l in lines:
+        points = getLineCoords(l[0], l[1])
+        cv.line(image, points[0], points[1], c, 1)
 
 
-domain = np.arange(-np.pi * 4, np.pi * 4, 0.01)
+for l in lines:
+    theta = l[0][1]
 
-for index, h in enumerate(hough):
-    theta = h.get("theta")
-    rho = h.get("rho")
+    distToOrigin = theta
+    distToEnd = np.sqrt(np.power(np.pi-theta,2))
+    distToMiddle = np.sqrt(np.power(np.pi/2 - theta, 2))
 
-    x = h.get("x")
-    y = h.get("y")
+    if distToMiddle < distToOrigin and distToMiddle < distToEnd:
+        h.append(*l)
+    else:
+        v.append(*l)
 
-    plt.figure()
-    plt.axes().set_facecolor("black")
-    for z in zip(x, y):
-        yyy = [z[0] * np.cos(d) + z[1] * np.sin(d) for d in domain]
-        plt.plot(domain, yyy, color=(1, 1, 1, 0.5), linewidth=0.5)
+black = np.zeros((500, 500, 3))
+hs = getBestLines(h)
+vs = getBestLines(v)
 
-    s = sorted(theta)
-    dd = [getDegree(t) for t in theta]
-    plt.figure()
-    sns.scatterplot(x=theta, y=rho, color=(1, 0, 0, 0.5))
+for v in vs:
+    for h in hs:
 
-    c = h.get('center')
-    sns.scatterplot(x=c[:,1], y=c[:,0])
+        hline, vline = getLineCoords(h[0], h[1]), getLineCoords(v[0], v[1])
+        point = poi(*hline[0], *hline[1], *vline[0], *vline[1])
 
-    # A =h.get('A')
-    # plt.figure()
-    # sns.scatterplot(x=A[:, 1], y=A[:, 0])
-    # B =h.get('B')
-    # plt.figure()
-    # sns.scatterplot(x=B[:, 1], y=B[:, 0])
+        if point is not None:
+            cv.drawMarker(resize, (int(point[0]), int(point[1])), (0,0,255), markerType=cv.MARKER_DIAMOND, markerSize=8, thickness=2)
 
-    # radon = h.get("radon")
-    # cv.imshow("radon_" + str(index), radon)
+c = (0, 0, 0)
+printLines(hs, resize, (0, 0, 255))
+printLines(vs, resize, (255, 0, 0))
+cv.imshow('Result', resize)
 
-
-plt.show(block=False)
 cv.waitKey(0)
-plt.close('all')
 cv.destroyAllWindows()
