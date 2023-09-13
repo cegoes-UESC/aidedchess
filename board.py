@@ -3,9 +3,12 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 
+from matplotlib import pyplot as plt
+import seaborn as sns
+
 path = Path("resources")
 
-image = "chess_2.jpeg"
+image = "chess_4.jpg"
 
 image = cv.imread(str(path / image), cv.IMREAD_COLOR)
 
@@ -13,7 +16,7 @@ resize = cv.resize(image, (500, 500))
 gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
 blur = cv.GaussianBlur(gray, (3, 3), 3)
 edges = cv.Canny(blur, 100, 200)
-lines = cv.HoughLinesWithAccumulator(edges, 1, np.pi/180, 80)
+lines = cv.HoughLinesWithAccumulator(edges, 1, np.pi/180, 80, min_theta=-np.pi/2,max_theta=np.pi/2)
 
 h, v = [],[]
 
@@ -76,14 +79,26 @@ def printLines(lines, image, c):
         cv.line(image, points[0], points[1], c, 1)
 
 
+lll=[]
+for l in lines:
+    lll.append(*l)
+
+lll = np.array(lll)
+
+print(lll[abs(lll[:, 1]) < np.pi/4])
+
+# middle = lll[np.abs(lll[:,1]) < np.pi/4]
+# print(middle)
+
+
 for l in lines:
     theta = l[0][1]
 
-    distToOrigin = theta
-    distToEnd = np.sqrt(np.power(np.pi-theta,2))
-    distToMiddle = np.sqrt(np.power(np.pi/2 - theta, 2))
+    distToOrigin = np.abs(theta)
+    distToStart = np.sqrt(np.power(-np.pi/2-theta,2))
+    distToEnd = np.sqrt(np.power(np.pi/2-theta,2))
 
-    if distToMiddle < distToOrigin and distToMiddle < distToEnd:
+    if distToStart < distToOrigin or distToEnd < distToOrigin:
         h.append(*l)
     else:
         v.append(*l)
@@ -105,6 +120,30 @@ c = (0, 0, 0)
 printLines(hs, resize, (0, 0, 255))
 printLines(vs, resize, (255, 0, 0))
 cv.imshow('Result', resize)
+
+domain = np.arange(-np.pi/2, np.pi/2, 0.01)
+
+v = np.array(vs)
+h = np.array(hs)
+
+res = np.vstack((v, h))
+
+plt.figure()
+plt.axes().set_facecolor('black')
+for l in res:
+    a = np.cos(l[1])
+    b=np.sin(l[1])
+
+    x0 = a * l[0]
+    y0 = b * l[0]
+    yyy = [x0*np.cos(d)+y0*np.sin(d) for d in domain]
+    sns.lineplot(x=domain, y=yyy, c=(1, 1, 1, 0.5))
+
+sns.scatterplot(x=res[:,1], y=res[:,0])
+plt.figure()
+
+sns.scatterplot(x=res[:,1],y=res[:, 0])
+plt.show()
 
 cv.waitKey(0)
 cv.destroyAllWindows()
