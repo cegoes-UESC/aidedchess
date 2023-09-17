@@ -203,8 +203,6 @@ class Board:
             )
             edges = cv.Canny(blur, self.canny.low, self.canny.high)
 
-            cv.imshow("canny", edges)
-
             lines = cv.HoughLinesWithAccumulator(
                 edges, self.hough.rho, self.hough.theta, self.hough.threshold
             )
@@ -300,14 +298,14 @@ class Board:
             angles = np.sort(angles)
             grad = np.gradient(angles)
 
-            cv.imshow("Lines", imgLines)
-            cv.imshow("Vertical-Horizontal", coloredLines)
-            cv.imshow("Best Vertical-Horizontal", bestLines)
-            cv.imshow("Intersections", inter)
-            cv.imshow("Result", resize)
+            if self.debug:
+                cv.imshow("Canny", edges)
+                cv.imshow("Lines", imgLines)
+                cv.imshow("Vertical-Horizontal", coloredLines)
+                cv.imshow("Best Vertical-Horizontal", bestLines)
+                cv.imshow("Intersections", inter)
+                cv.imshow("Result", resize)
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
-        print("Processed!")
-        print("Press any key to finish...")
-        cv.waitKey(0)
+        return resize
