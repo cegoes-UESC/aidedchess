@@ -3,6 +3,9 @@ import cv2 as cv
 
 from sklearn.cluster import AgglomerativeClustering
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 class Line:
     _SIZE = 3000
@@ -207,8 +210,9 @@ class Board:
                 edges, self.hough.rho, self.hough.theta, self.hough.threshold
             )
 
-            if lines is None:
-                raise Exception("Lines not found")
+            if lines is None or len(lines) < 2:
+                return resize
+                # raise Exception("Lines not found")
 
             l = np.empty((0, 7))
             for ll in lines:
@@ -240,7 +244,19 @@ class Board:
                 for j, b in enumerate(lines):
                     theta1, theta2 = a[1], b[1]
 
-                    diff = theta1 - theta2
+                    if theta1 > theta2:
+                        diff = theta1 - theta2
+                    else:
+                        diff = theta2 - theta1
+
+                    diff = abs(diff)
+                    ninety = np.pi / 2
+
+                    if ninety > diff:
+                        diff = ninety - diff
+                    else:
+                        diff = diff - ninety
+                    diff = ninety - diff
 
                     diffMatrix[i, j] = abs(diff)
 
@@ -263,6 +279,7 @@ class Board:
             bestLines = np.zeros((500, 500, 3))
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
+
             for line in hs:
                 Line.printLine(bestLines, line)
                 Line.printLine(resize, line)
@@ -305,6 +322,16 @@ class Board:
                 cv.imshow("Best Vertical-Horizontal", bestLines)
                 cv.imshow("Intersections", inter)
                 cv.imshow("Result", resize)
+
+                # hs = np.array(hs)
+                # vs=np.array(vs)
+                # plt.figure()
+                # sns.scatterplot(x=hs[:, 1], y=hs[:, 0], color='red')
+                # sns.scatterplot(x=vs[:, 1], y=vs[:, 0], color='blue')
+                # plt.show(block=False)
+                # cv.waitKey(0)
+                # plt.close()
+
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
