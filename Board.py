@@ -207,12 +207,16 @@ class Board:
             edges = cv.Canny(blur, self.canny.low, self.canny.high)
 
             lines = cv.HoughLinesWithAccumulator(
-                edges, self.hough.rho, self.hough.theta, self.hough.threshold
+                edges,
+                self.hough.rho,
+                self.hough.theta,
+                self.hough.threshold,
+                min_theta=-np.pi / 2,
+                max_theta=np.pi / 2,
             )
 
             if lines is None or len(lines) < 2:
                 return resize
-                # raise Exception("Lines not found")
 
             l = np.empty((0, 7))
             for ll in lines:
@@ -322,15 +326,6 @@ class Board:
                 cv.imshow("Best Vertical-Horizontal", bestLines)
                 cv.imshow("Intersections", inter)
                 cv.imshow("Result", resize)
-
-                # hs = np.array(hs)
-                # vs=np.array(vs)
-                # plt.figure()
-                # sns.scatterplot(x=hs[:, 1], y=hs[:, 0], color='red')
-                # sns.scatterplot(x=vs[:, 1], y=vs[:, 0], color='blue')
-                # plt.show(block=False)
-                # cv.waitKey(0)
-                # plt.close()
 
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
