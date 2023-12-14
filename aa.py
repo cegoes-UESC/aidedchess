@@ -33,5 +33,7 @@ class AnnotShapes:
         ]
 
 
-with make_client(host="localhost", credentials=("user", "password")) as client:
+with make_client(
+    host="http://localhost", port=8080, credentials=("user", "password")
+) as client:
     cvataa.annotate_task(client, 41617, AnnotShapes)
