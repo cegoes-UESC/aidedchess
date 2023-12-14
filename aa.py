@@ -15,7 +15,6 @@ class AnnotShapes:
     def spec(self) -> cvataa.DetectionFunctionSpec:
         return cvataa.DetectionFunctionSpec(
             labels=[
-                # cvataa.label_spec(name, id) for (name, id) in self.model.names.items(),
                 cvataa.skeleton_label_spec(name, id)
                 for (name, id) in self.model.names.items()
             ],
