@@ -8,31 +8,59 @@ import cvat_sdk.auto_annotation as cvataa
 
 class AnnotShapes:
     def __init__(self) -> None:
-        self.model = YOLO("models/best-pose-07-12.pt")
-        self.model.eval()
+        self.model = YOLO("models/pose.pt")
 
     @property
     def spec(self) -> cvataa.DetectionFunctionSpec:
         return cvataa.DetectionFunctionSpec(
             labels=[
-                cvataa.skeleton_label_spec(name, id)
-                for (name, id) in self.model.names.items()
+                cvataa.skeleton_label_spec(
+                    name,
+                    id,
+                    [
+                        models.SublabelRequest(str(x), id=x, type="points")
+                        for x in range(1, 5)
+                    ],
+                )
+                for id, name in self.model.names.items()
             ],
         )
 
     def detect(
         self, context, image: PIL.Image.Image
     ) -> List[models.LabeledShapeRequest]:
-        results = self.model(image)
+        print(f"=== Annotating image {context.frame_name} ===")
+        results = self.model(image, verbose=False)
 
         return [
-            cvataa.skeleton(label.item(), skeleton.xy.tolist())
+            cvataa.skeleton(
+                int(label.item()),
+                elements=[
+                    {
+                        "frame": 0,
+                        "type": "points",
+                        "label_id": idx + 1,
+                        "points": sk.tolist(),
+                    }
+                    for idx, sk in enumerate(skeleton.xy[0])
+                ],
+            )
             for result in results
             for skeleton, label in zip(result.keypoints, result.boxes.cls)
         ]
 
 
+import sys
+
+try:
+    taskId = sys.argv[1]
+except:
+    print("Unable to read task ID")
+    exit()
+
+
 with make_client(
-    host="http://localhost", port=8080, credentials=("user", "password")
+    host="http://localhost", port=8080, credentials=("almir", "1234")
 ) as client:
-    cvataa.annotate_task(client, 41617, AnnotShapes)
+    print(f"Running AUTO ANNOTATION on TASK {taskId}")
+    cvataa.annotate_task(client, int(taskId), AnnotShapes(), clear_existing=True)
