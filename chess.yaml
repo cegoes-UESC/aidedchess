@@ -4,7 +4,6 @@ train: images/train
 val: images/val
 
 nc: 13
-
 kpt_shape: [4, 3]
 
 names:
