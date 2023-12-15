@@ -1,7 +1,6 @@
-*Detecção Tabuleiro (Keypoints)
-*Detecção Peças (Keypoints)
-
-Auto anotação
+* Detecção Tabuleiro (Keypoints)
+* Detecção Peças (Keypoints)
+* Auto anotação
 
 Mais fotos
 Optuna ou Tuner do YOLO
