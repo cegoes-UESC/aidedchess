@@ -1,8 +1,9 @@
 * Detecção Tabuleiro (Keypoints)
 * Detecção Peças (Keypoints)
 * Auto anotação
+* Correção Perspectiva
 
-Mais fotos
++ Mais fotos
 Optuna ou Tuner do YOLO
-Correção Perspectiva 8 linhas e colunas (Casas)
+8 linhas e colunas (Casas)
 Inserir as posições possíveis das peças
