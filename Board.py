@@ -1,8 +1,9 @@
 import cv2 as cv
 import numpy as np
 from ultralytics import YOLO
+from pathlib import Path
 
-model = YOLO("pose-14-12_13.pt")
+model = YOLO("models/best.pt")
 
 
 class Board:
@@ -18,21 +19,20 @@ class Board:
         return cv.warpPerspective(self.image, M, (300, 300))
 
 
-src = "IMG_2481.jpg"
+root = Path("datasets/chess/images/train")
 
-cv.namedWindow("SRC", cv.WINDOW_GUI_EXPANDED)
-image = cv.imread(src)
+src = "datasets/chess/images/train/IMG_2661.jpg"
 
-cv.imshow("SRC", image)
+images = list(root.glob("*.jpg"))
 
-pred = model.predict(src, verbose=False, classes=[0], save=False)
+for image in images:
+    pred = model.predict(image.resolve(), verbose=False, classes=[0], save=False)
 
-pts = pred[0].keypoints.xy.tolist()[0]
-pts = np.float32(pts)
+    pts = pred[0].keypoints.xy.tolist()[0]
+    pts = np.float32(pts)
 
-b = Board(image, pts)
+    b = Board(cv.imread(str(image.resolve())), pts)
 
-per = b._try()
+    per = b._try()
 
-cv.imshow("PER", per)
-cv.waitKey(0)
+    cv.imwrite("try/" + image.name, per)
