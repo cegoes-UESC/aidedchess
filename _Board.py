@@ -78,8 +78,8 @@ class Line:
 
 
 class Canny:
-    low = 0
-    high = 370
+    low = 140
+    high = 240
 
     def setLow(self, value):
         if value <= 0:
@@ -97,7 +97,7 @@ class Canny:
 class Hough:
     rho = 1
     theta = np.pi / 180
-    threshold = 80
+    threshold = 100
 
     def setRho(self, value):
         if value <= 0:
