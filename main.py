@@ -1,36 +1,48 @@
-from Board import Board
-
 import cv2 as cv
-
+import numpy as np
+from Board import Board
 from pathlib import Path
-from time import time
+from ultralytics import YOLO
+from Perspective import Perspective
 
-b = Board(True)
+model = YOLO("models/best.pt")
 
-p = Path("resources")
-images = p.glob("*")
 
-# v = cv.VideoCapture(0)
+image = Path("datasets/chess/images/train/IMG_2651.jpg")
 
-# while v.isOpened():
-#     _, frame = v.read()
-#     cv.imshow("me", frame)
-#     b.setImage(frame)
-#     image = frame
-#     try:
-#         image = b.process()
-#     except:
-#         pass
-#     cv.imshow("result", image)
-#     if cv.waitKey(1) == ord("q"):
-#         break
+prediction = model.predict(image.resolve(), verbose=False, classes=[0], save=False)
 
-# v.release()
+boardKeypoints = np.float32(prediction[0].keypoints.xy.tolist()[0])
 
-for image in list(images):
-    im = cv.imread(str(image))
-    b.setImage(im)
-    result = b.process()
+im = cv.imread(str(image.resolve()))
 
+perspective = Perspective(im, boardKeypoints)
+boardPerspective = perspective.apply()
+
+board = Board(debug=False)
+board.setImage(boardPerspective)
+
+boardResized, centers, (horizontal, vertical) = board.process()
+boardIntersections = perspective.undoPerspective(np.array([centers]))
+
+intersections = boardIntersections[0]
+
+for point in intersections:
+    cv.drawMarker(
+        im,
+        (int(point[0]), int(point[1])),
+        (255, 0, 255),
+        cv.MARKER_CROSS,
+        50,
+        3,
+    )
+
+
+cv.namedWindow("markers", cv.WINDOW_GUI_EXPANDED)
+while True:
+    cv.imshow("markers", im)
+    if cv.waitKey(100) == ord("q"):
+        break
+
+print("Press any key to exit...")
 cv.waitKey(0)
-cv.destroyAllWindows()
