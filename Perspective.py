@@ -9,7 +9,7 @@ class Perspective:
         self.matrix = []
         self.size = size
 
-    def applyPerspective(self):
+    def apply(self):
         self.outPoints = np.float32(
             [[0, 0], [self.size, 0], [self.size, self.size], [0, self.size]]
         )
