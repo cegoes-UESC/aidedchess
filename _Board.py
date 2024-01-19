@@ -4,7 +4,6 @@ import cv2 as cv
 from sklearn.cluster import AgglomerativeClustering
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class Line:
@@ -293,9 +292,11 @@ class Board:
                 Line.printLine(resize, line, (255, 0, 0))
 
             inter = np.zeros((500, 500, 3))
+            centers = []
             for h in hs:
                 for v in vs:
                     center = Line.getIntersectionPoint(h, v)
+                    centers.append(center)
 
                     if center is not None:
                         cv.drawMarker(
@@ -330,4 +331,4 @@ class Board:
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
-        return resize
+        return resize, centers, (hs, vs)
