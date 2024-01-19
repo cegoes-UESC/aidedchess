@@ -18,7 +18,7 @@ class Perspective:
 
         return cv.warpPerspective(self.image, self.matrix, (self.size, self.size))
 
-    def ll(self, points):
+    def undoPerspective(self, points):
         # w, h = self.image.shape[1], self.image.shape[0]
         inverseMatrix = np.linalg.inv(self.matrix)
         return cv.perspectiveTransform(points, inverseMatrix)
