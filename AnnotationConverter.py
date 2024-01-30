@@ -1,6 +1,6 @@
 from ultralytics.data.converter import convert_coco
 
-PATH = "09-01-24/"
+PATH = "30-01-24/"
 
 
 def convert():
@@ -10,3 +10,6 @@ def convert():
         use_keypoints=True,
         cls91to80=False,
     )
+
+
+convert()
