@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 from math import sqrt
+import random
 
 from sklearn.cluster import AgglomerativeClustering
 
@@ -337,10 +338,14 @@ class Board:
             inter = np.zeros((500, 500, 3))
             centers = []
 
-            for h in hs_np:
-                for v in vs_np:
+            inter_np = np.zeros((hs_np.shape[0], vs_np.shape[0], 2))
+
+            for h_idx, h in enumerate(hs_np):
+                for v_idx, v in enumerate(vs_np):
                     center = Line.getIntersectionPoint(h, v)
                     centers.append(center)
+
+                    inter_np[h_idx, v_idx] = [center[0], center[1]]
 
                     if center is not None:
                         cv.drawMarker(
@@ -360,6 +365,62 @@ class Board:
                             thickness=3,
                         )
 
+            s = inter_np.shape
+            x0, y0 = s[0], s[1]
+
+            squares = []
+
+            squares_overlay = resize.copy()
+
+            for i in range(0, x0 - 1):
+                for j in range(0, y0 - 1):
+
+                    sq = (
+                        inter_np[i][j],
+                        inter_np[i + 1][j],
+                        inter_np[i + 1][j + 1],
+                        inter_np[i][j + 1],
+                    )
+
+                    ran = random.Random()
+
+                    r, g, b = (
+                        ran.randint(0, 255),
+                        ran.randint(0, 255),
+                        ran.randint(0, 255),
+                    )
+
+                    cv.fillConvexPoly(
+                        squares_overlay,
+                        np.array(
+                            [
+                                [
+                                    [sq[0][0], sq[0][1]],
+                                    [sq[1][0], sq[1][1]],
+                                    [sq[2][0], sq[2][1]],
+                                    [sq[3][0], sq[3][1]],
+                                ]
+                            ]
+                            # [
+                            #     (int(sq[1][0]), int(sq[1][1])),
+                            # ],
+                            # [
+                            #     (int(sq[2][0]), int(sq[2][1])),
+                            # ],
+                            # [
+                            #     (int(sq[3][0]), int(sq[3][1])),
+                            #     (int(sq[0][0]), int(sq[0][1])),
+                            # ],
+                            ,
+                            dtype=np.int32,
+                        ),
+                        (b, g, r),
+                        # cv.FILLED,
+                    )
+                    squares.append(sq)
+
+            final_square = cv.addWeighted(squares_overlay, 0.4, resize, 1 - 0.4, 0)
+
             angles = l[:, 1]
             angles = np.sort(angles)
             grad = np.gradient(angles)
@@ -372,6 +433,7 @@ class Board:
                 cv.imshow("Intersections", inter)
                 cv.imshow("Vertical Lines", verticals)
                 cv.imshow("Horizontal Lines", horizontals)
+                cv.imshow("Squares", final_square)
                 cv.imshow("Result", resize)
 
             if cv.waitKey(100) == ord("q") or not self.debug:
