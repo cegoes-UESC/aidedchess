@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+from math import sqrt
 
 from sklearn.cluster import AgglomerativeClustering
 
@@ -281,18 +282,63 @@ class Board:
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
 
-            for line in hs:
+            verticals, horizontals = np.zeros((500, 500, 3)), np.zeros((500, 500, 3))
+
+            middleHorizontal = (0, 0, 0, 0, 250, 500, 250)
+            middleVertical = (0, 0, 0, 250, 0, 250, 500)
+
+            Line.printLine(horizontals, middleVertical, (255, 0, 0))
+            Line.printLine(verticals, middleHorizontal, (255, 0, 0))
+
+            horizontalPivotPoint = (0, 250)
+            verticalPivotPoint = (250, 0)
+
+            hs_np = np.array(hs)
+            vs_np = np.array(vs)
+
+            hs_np = np.hstack((hs_np, np.zeros((hs_np.shape[0], 3), dtype=hs_np.dtype)))
+            vs_np = np.hstack((vs_np, np.zeros((vs_np.shape[0], 3), dtype=vs_np.dtype)))
+
+            for line in hs_np:
                 Line.printLine(bestLines, line)
                 Line.printLine(resize, line)
+                center = Line.getIntersectionPoint(middleVertical, line)
+                line[7] = int(center[0])
+                line[8] = int(center[1])
+                line[9] = int(
+                    sqrt(
+                        (line[7] - verticalPivotPoint[0])
+                        + (line[8] - verticalPivotPoint[1])
+                    )
+                )
 
-            for line in vs:
+            for line in vs_np:
                 Line.printLine(bestLines, line, (255, 0, 0))
                 Line.printLine(resize, line, (255, 0, 0))
+                center = Line.getIntersectionPoint(middleHorizontal, line)
+                line[7] = int(center[0])
+                line[8] = int(center[1])
+                line[9] = int(
+                    sqrt(
+                        (line[7] - horizontalPivotPoint[0])
+                        + (line[8] - horizontalPivotPoint[1])
+                    )
+                )
+
+            hs_np = hs_np[hs_np[:, 9].argsort()]
+            vs_np = vs_np[vs_np[:, 9].argsort()]
+
+            for line in hs_np:
+                Line.printLine(horizontals, line, (255, 255, 255))
+
+            for line in vs_np:
+                Line.printLine(verticals, line, (255, 255, 255))
 
             inter = np.zeros((500, 500, 3))
             centers = []
-            for h in hs:
-                for v in vs:
+
+            for h in hs_np:
+                for v in vs_np:
                     center = Line.getIntersectionPoint(h, v)
                     centers.append(center)
 
@@ -324,6 +370,8 @@ class Board:
                 cv.imshow("Vertical-Horizontal", coloredLines)
                 cv.imshow("Best Vertical-Horizontal", bestLines)
                 cv.imshow("Intersections", inter)
+                cv.imshow("Vertical Lines", verticals)
+                cv.imshow("Horizontal Lines", horizontals)
                 cv.imshow("Result", resize)
 
             if cv.waitKey(100) == ord("q") or not self.debug:
