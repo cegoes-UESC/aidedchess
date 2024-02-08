@@ -1,6 +1,6 @@
 import numpy as np
 import cv2 as cv
-from math import sqrt
+from math import sqrt, pow
 import random
 
 from sklearn.cluster import AgglomerativeClustering
@@ -308,8 +308,8 @@ class Board:
                 line[8] = int(center[1])
                 line[9] = int(
                     sqrt(
-                        (line[7] - verticalPivotPoint[0])
-                        + (line[8] - verticalPivotPoint[1])
+                        pow(line[7] - verticalPivotPoint[0], 2)
+                        + pow(line[8] - verticalPivotPoint[1], 2)
                     )
                 )
 
@@ -321,8 +321,8 @@ class Board:
                 line[8] = int(center[1])
                 line[9] = int(
                     sqrt(
-                        (line[7] - horizontalPivotPoint[0])
-                        + (line[8] - horizontalPivotPoint[1])
+                        pow(line[7] - horizontalPivotPoint[0], 2)
+                        + pow(line[8] - horizontalPivotPoint[1], 2)
                     )
                 )
 
@@ -400,22 +400,10 @@ class Board:
                                     [sq[2][0], sq[2][1]],
                                     [sq[3][0], sq[3][1]],
                                 ]
-                            ]
-                            # [
-                            #     (int(sq[1][0]), int(sq[1][1])),
-                            # ],
-                            # [
-                            #     (int(sq[2][0]), int(sq[2][1])),
-                            # ],
-                            # [
-                            #     (int(sq[3][0]), int(sq[3][1])),
-                            #     (int(sq[0][0]), int(sq[0][1])),
-                            # ],
-                            ,
+                            ],
                             dtype=np.int32,
                         ),
                         (b, g, r),
-                        # cv.FILLED,
                     )
                     squares.append(sq)
 
