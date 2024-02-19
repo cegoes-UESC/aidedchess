@@ -8,7 +8,7 @@ from Perspective import Perspective
 model = YOLO("models/best.pt")
 
 
-image = Path("datasets/chess/images/train/IMG_2651.jpg")
+image = Path("datasets/chess/images/train/IMG_2610.jpg")
 
 prediction = model.predict(image.resolve(), verbose=False, classes=[0], save=False)
 
@@ -19,7 +19,7 @@ im = cv.imread(str(image.resolve()))
 perspective = Perspective(im, boardKeypoints)
 boardPerspective = perspective.apply()
 
-board = Board(debug=False)
+board = Board(debug=True)
 board.setImage(boardPerspective)
 
 boardResized, centers, (horizontal, vertical) = board.process()
