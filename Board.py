@@ -45,7 +45,7 @@ class Line:
             for index, line in enumerate(it):
                 rho1, theta1, acc1 = line[0], line[1], line[2]
 
-                dist = np.sqrt(np.power((rho - rho1) + (theta - theta1), 2))
+                dist = np.sqrt(np.power(rho - rho1, 2) + np.power(theta - theta1, 2))
                 if dist < th:
                     if acc > acc1:
                         del bestLines[index]
