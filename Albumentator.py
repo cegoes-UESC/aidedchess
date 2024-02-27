@@ -17,6 +17,9 @@ imagesJ = train_images_path.glob("*.JPG")
 
 images = list(imagesj) + list(imagesJ)
 
+out_images_folder = Path("datasets/albumented/images/train")
+out_labels_folder = Path("datasets/albumented/labels/train")
+
 for im in images:
     filename = im.name.split(".")[0]
     label_name = filename + ".txt"
@@ -27,7 +30,7 @@ for im in images:
     image = cv.imread(str(im.absolute()), cv.IMREAD_COLOR)
     h, w = image.shape[0:2]
 
-    cv.namedWindow("image", cv.WINDOW_GUI_NORMAL)
+    # cv.namedWindow("image", cv.WINDOW_GUI_NORMAL)
     bs, ks = [], []
     targets = {}
     arguments = {}
@@ -68,17 +71,17 @@ for im in images:
     transform = A.Compose(
         [
             A.Normalize(),
-            A.ColorJitter(),
             A.GaussianBlur(p=0.25),
+            A.GaussNoise((0, 1), p=0.2),
+            A.ColorJitter(),
+            A.ShiftScaleRotate(
+                p=0.2, border_mode=cv.BORDER_TRANSPARENT, rotate_method="ellipse"
+            ),
             A.RandomBrightnessContrast(p=0.2),
             A.Defocus(p=0.2),
             A.Perspective(p=0.15),
-            A.ShiftScaleRotate(
-                p=0.25, border_mode=cv.BORDER_TRANSPARENT, rotate_method="ellipse"
-            ),
             A.VerticalFlip(p=0.1),
             A.HorizontalFlip(p=0.1),
-            A.GaussNoise((0, 1)),
         ],
         bbox_params=A.BboxParams(format="yolo"),
         keypoint_params=A.KeypointParams(format="xy", remove_invisible=False),
@@ -93,9 +96,9 @@ for im in images:
     ones = np.ones((4, 1), dtype=np.int32)
 
     out_name = filename + "_" + str(time_ns())
-    out_path = Path(str(train_images_path / out_name) + ".jpg")
-    out_im = cv.imwrite(str(out_path.absolute()), trans_image)
-    out_labels = Path(str(train_labels_path / out_name) + ".txt")
+    out_path = Path(str(out_images_folder / out_name) + ".jpg")
+    cv.imwrite(str(out_path.absolute()), trans_image * 255)
+    out_labels = Path(str(out_labels_folder / out_name) + ".txt")
     out_labels_file = open(out_labels.absolute(), "w")
 
     for i in range(size):
@@ -117,11 +120,20 @@ for im in images:
 
         kps = trans[key]
 
-        kps = list(map(lambda x: (int(x[0]), int(x[1])), kps))
+        kps = np.array(
+            list(map(lambda x: (int(x[0]), int(x[1])), kps)), dtype=np.float32
+        )
         kps = np.hstack([kps, ones])
 
         out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
         kps[out] = 0
+
+        for idx, (k) in enumerate(kps):
+            kps[idx, 0] = k[0] / w
+            kps[idx, 1] = k[1] / h
+
+        # for k in kps:
+        #     cv.circle(trans_image, (k[0], k[1]), 15, (0, 0, 255), 10)
 
         kps = kps.reshape(12)
 
@@ -132,4 +144,5 @@ for im in images:
         out_labels_file.flush()
 
     out_labels_file.close()
-    cv.imshow("image", trans_image)
+    print("Image saved")
+    # cv.imshow("image", trans_image)
