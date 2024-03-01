@@ -23,3 +23,13 @@
 https://albumentations.ai/docs/getting_started/keypoints_augmentation/ -> citação no final da página inicial
 
 -> Usar o optuna por ser mais completo que o tuning e deixar rodando com os mesmos parâmetros
+
+---
+
+-> Configurar o Optuna para melhorar o fitness (depois)
+
+-> Corrigir o problema do ambiente do Kaggle
+-> Adicionar dropout no treinamento do YOLO (0 a 20)
+    -> Estudar funcionamento e melhoria do dropout
+    -> Iniciar com 5%
+-> Marcar os pontos não visíveis através do CVAT
