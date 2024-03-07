@@ -37,9 +37,9 @@ for im in images:
     size = 0
     for item_idx, l in enumerate(label_file):
         size = size + 1
-        if item_idx != 0:
-            targets["bboxes" + str(item_idx - 1)] = "bboxes"
-            targets["keypoints" + str(item_idx - 1)] = "keypoints"
+        # if item_idx != 0:
+        #     targets["bboxes" + str(item_idx - 1)] = "bboxes"
+        #     targets["keypoints" + str(item_idx - 1)] = "keypoints"
 
         labels_content = l.split(" ")
         labels_content = labels_content[:-1]
