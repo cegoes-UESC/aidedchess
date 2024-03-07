@@ -1,6 +1,7 @@
 from ultralytics.data.converter import convert_coco
+from sys import argv
 
-PATH = "30-01-24/"
+PATH = argv[1]
 
 
 def convert():
