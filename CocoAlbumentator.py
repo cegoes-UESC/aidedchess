@@ -1,9 +1,10 @@
 import cv2 as cv
-from pathlib import Path
-import albumentations as A
+import numpy as np
 from sys import argv
-import random, math, json
+from pathlib import Path
 from time import time_ns
+import random, math, json
+from albument import augment
 
 VAL_PROP = 0.2
 
@@ -26,44 +27,110 @@ val_ids = list(map(lambda x: x["file_name"], images[:GET]))
 data["val"] = val_ids
 
 
-file = open("annotations/" + path + "/out_keypoints.json", "w")
-json.dump(data, file)
-file.close()
-
-
 def get_image_annotations(image_id):
     return list(filter(lambda x: x["image_id"] == image_id, data["annotations"]))
 
 
 def add_image(id, name, w, h):
-    pass
+    data["images"].append(
+        {
+            "id": id,
+            "width": w,
+            "height": h,
+            "file_name": name,
+            "license": 0,
+            "flickr_url": "",
+            "coco_url": "",
+            "date_captured": 0,
+        }
+    )
 
 
 def add_annotation(id, image_id, category_id, bboxes, keypoints):
+    kpts = keypoints.reshape(12)
     ann = {
         "id": id,
         "image_id": image_id,
         "category_id": category_id,
-        "bboxes": bboxes,
-        "keypoints": keypoints,
+        "bbox": bboxes,
+        "keypoints": [k for i, k in enumerate(kpts)],
         "num_keypoints": 4,
         "attributes": {"occluded": False},
         "segmentation": [],
         "area": bboxes[2] * bboxes[3],
         "iscrowd": 0,
     }
+    data["annotations"].append(ann)
 
 
-current_image_id = data["images"][len(data["images"]) - 1]
-current_ann_id = data["annotations"][len(data["annotations"]) - 1]
+current_image_id = data["images"][len(data["images"]) - 1]["id"]
+current_ann_id = data["annotations"][len(data["annotations"]) - 1]["id"]
 
-for im in data["images"]:
+images = data["images"].copy()
+
+for im in images:
     id = im["id"]
     filename = im["file_name"]
+    if filename in val_ids:
+        continue
+
     p = str(Path("datasets/albumented/images/train/" + filename).absolute())
     image = cv.imread(p, cv.IMREAD_COLOR)
-    out_name = filename + "_" + str(time_ns())
+    out_name = filename.split(".")[0] + "_" + str(time_ns())
 
     h, w = image.shape[:2]
+    current_image_id = current_image_id + 1
     add_image(current_image_id, out_name + ".jpg", w, h)
     ann = get_image_annotations(id)
+
+    classes, bboxes, keypoints, visibility = [], [], [], []
+
+    for a in ann:
+        classes.append(a["category_id"])
+        bboxes.append(a["bbox"])
+
+        kp_np = np.array(a["keypoints"])
+        kp_np = kp_np.reshape((4, 3))
+        v = []
+        for k in kp_np:
+            keypoints.append([k[0], k[1]])
+            v.append(k[2])
+        visibility.append(v)
+
+    b = [bboxes, classes]
+    k = [keypoints, classes]
+
+    for idx, bbb in enumerate(bboxes):
+        if bbb[2] == 0:
+            bboxes[idx][2] = 1
+        if bbb[3] == 0:
+            bboxes[idx][3] = 1
+
+    im, bboxes, kpts, classes = augment(image, b, k, True)
+
+    h, w = im.shape[:2]
+    kpts = kpts.reshape((len(classes), 4, 3))
+
+    print(visibility)
+
+    for j, g in enumerate(kpts):
+        for l, k in enumerate(g):
+            if k[2] != 0:
+                print(visibility[j])
+                kpts[j][l][2] = visibility[j][l]
+
+    cv.imwrite(
+        str(Path("datasets/albumented/images/train/" + out_name + ".jpg").absolute()),
+        im * 255,
+    )
+
+    for idx, i in enumerate(classes):
+        current_ann_id = current_ann_id + 1
+        add_annotation(
+            current_ann_id, current_image_id, i, bboxes[idx], keypoints=kpts[idx]
+        )
+
+
+file = open("annotations/" + path + "/out_keypoints.json", "w")
+json.dump(data, file)
+file.close()
