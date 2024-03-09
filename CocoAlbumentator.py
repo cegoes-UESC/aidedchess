@@ -111,8 +111,6 @@ for im in images:
     h, w = im.shape[:2]
     kpts = kpts.reshape((len(classes), 4, 3))
 
-    print(visibility)
-
     for j, g in enumerate(kpts):
         for l, k in enumerate(g):
             if k[2] != 0:
