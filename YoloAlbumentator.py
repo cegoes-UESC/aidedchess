@@ -1,8 +1,8 @@
 import cv2 as cv
-from pathlib import Path
-import albumentations as A
 import numpy as np
+from pathlib import Path
 from time import time_ns
+from albument import augment
 
 path = Path("datasets/chess")
 
@@ -30,25 +30,17 @@ for im in images:
     image = cv.imread(str(im.absolute()), cv.IMREAD_COLOR)
     h, w = image.shape[0:2]
 
-    # cv.namedWindow("image", cv.WINDOW_GUI_NORMAL)
-    bs, ks = [], []
-    targets = {}
-    arguments = {}
-    size = 0
+    bboxes, bboxes_class, keypoints, keypoints_class = [], [], [], []
+
     for item_idx, l in enumerate(label_file):
-        size = size + 1
-        # if item_idx != 0:
-        #     targets["bboxes" + str(item_idx - 1)] = "bboxes"
-        #     targets["keypoints" + str(item_idx - 1)] = "keypoints"
 
         labels_content = l.split(" ")
         labels_content = labels_content[:-1]
         _class = int(labels_content[0])
 
         points = list(map(float, labels_content[1:]))
-        bbs = points[0:4]
-        bbs.append(_class)
-        bs.append(bbs)
+        bboxes.append(points[0:4])
+        bboxes_class.append(_class)
 
         kpts1, kpts2, kpts3, kpts4 = (
             points[4:6],
@@ -61,88 +53,60 @@ for im in images:
         for idx, (kw, kh) in enumerate(kpts):
             kpts[idx] = [int(kw * w), int(kh * h)]
 
-        if item_idx != 0:
-            arguments["keypoints" + str(item_idx - 1)] = kpts
-            arguments["bboxes" + str(item_idx - 1)] = bs
-        else:
-            arguments["keypoints"] = kpts
-            arguments["bboxes"] = bs
+        keypoints.extend(kpts)
+        keypoints_class.append(_class)
 
-    transform = A.Compose(
-        [
-            A.Normalize(),
-            A.GaussianBlur(p=0.25),
-            A.GaussNoise((0, 1), p=0.2),
-            A.ColorJitter(),
-            A.ShiftScaleRotate(
-                p=0.2, border_mode=cv.BORDER_TRANSPARENT, rotate_method="ellipse"
-            ),
-            A.RandomBrightnessContrast(p=0.2),
-            A.Defocus(p=0.2),
-            A.Perspective(p=0.15),
-            A.VerticalFlip(p=0.1),
-            A.HorizontalFlip(p=0.1),
-        ],
-        bbox_params=A.BboxParams(format="yolo"),
-        keypoint_params=A.KeypointParams(format="xy", remove_invisible=False),
-        additional_targets=targets,
-    )
+    kpts_np = np.array(keypoints, np.float32)
 
-    trans = transform(image=image, **arguments)
-    trans_image = trans["image"]
+    b = [bboxes, bboxes_class]
+    k = [kpts_np, keypoints_class]
 
-    h, w = trans_image.shape[:2]
+    im, bboxes, kpts, classes = augment(image, b, k, False)
+    h, w = im.shape[:2]
 
-    ones = np.ones((4, 1), dtype=np.int32)
+    kpts = kpts.reshape((len(classes), 4, 3))
+
+    # for b in bboxes:
+    #     w2 = (b[2] * w) / 2
+    #     h2 = (b[3] * h) / 2
+    #     cv.rectangle(
+    #         im,
+    #         (int(b[0] * w - w2), int(b[1] * h - h2)),
+    #         (int(b[0] * w + w2), int(b[1] * h + h2)),
+    #         (255, 0, 0),
+    #         20,
+    #     )
+
+    # for g in kpts:
+    #     for k in g:
+    #         cv.circle(im, (int(k[0]), int(k[1])), 10, (0, 0, 255), 10)
+
+    for i, g in enumerate(kpts):
+        for idx, k in enumerate(g):
+            kpts[i, idx, 0] = k[0] / w
+            kpts[i, idx, 1] = k[1] / h
 
     out_name = filename + "_" + str(time_ns())
     out_path = Path(str(out_images_folder / out_name) + ".jpg")
-    cv.imwrite(str(out_path.absolute()), trans_image * 255)
+    cv.imwrite(str(out_path.absolute()), im * 255)
     out_labels = Path(str(out_labels_folder / out_name) + ".txt")
     out_labels_file = open(out_labels.absolute(), "w")
 
-    for i in range(size):
+    args = []
+    for idx, i in enumerate(classes):
+        args = []
+        args.append(i)
 
-        kb = "bboxes"
+        for b in bboxes[idx]:
+            args.append(b)
 
-        bxx = trans[kb]
-
-        bxx = bxx[i]
-
-        _cx = bxx[4]
-        bx = bxx[0:4]
-
-        real_out = []
-        real_out.append(_cx)
-        real_out.extend(bx)
-
-        key = "keypoints" + (str(i - 1) if i != 0 else "")
-
-        kps = trans[key]
-
-        kps = np.array(
-            list(map(lambda x: (int(x[0]), int(x[1])), kps)), dtype=np.float32
-        )
-        kps = np.hstack([kps, ones])
-
-        out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
-        kps[out] = 0
-
-        for idx, (k) in enumerate(kps):
-            kps[idx, 0] = k[0] / w
-            kps[idx, 1] = k[1] / h
-
-        # for k in kps:
-        #     cv.circle(trans_image, (k[0], k[1]), 15, (0, 0, 255), 10)
-
-        kps = kps.reshape(12)
-
-        real_out.extend(kps)
-        line = " ".join(list(map(str, real_out)))
-
-        out_labels_file.write(line + "\n")
+        for k in kpts[idx]:
+            args.append(k[0])
+            args.append(k[1])
+            args.append(int(k[2]))
+        line = list(map(str, args))
+        out_labels_file.write(" ".join(line) + "\n")
         out_labels_file.flush()
 
     out_labels_file.close()
     print("Image saved")
-    # cv.imshow("image", trans_image)
