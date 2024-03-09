@@ -35,7 +35,6 @@ for im in images:
     for item_idx, l in enumerate(label_file):
 
         labels_content = l.split(" ")
-        labels_content = labels_content[:-1]
         _class = int(labels_content[0])
 
         points = list(map(float, labels_content[1:]))
@@ -89,7 +88,7 @@ for im in images:
             kpts[i, idx, 0] = k[0] / w
             kpts[i, idx, 1] = k[1] / h
             if k[2] != 0:
-                kpts[i, idx, 2] = visibility[i, idx]
+                kpts[i, idx, 2] = visibility[i][idx]
 
     out_name = filename + "_" + str(time_ns())
     out_path = Path(str(out_images_folder / out_name) + ".jpg")
