@@ -30,7 +30,7 @@ for im in images:
     image = cv.imread(str(im.absolute()), cv.IMREAD_COLOR)
     h, w = image.shape[0:2]
 
-    bboxes, bboxes_class, keypoints, keypoints_class = [], [], [], []
+    bboxes, bboxes_class, keypoints, keypoints_class, visibility = [], [], [], [], []
 
     for item_idx, l in enumerate(label_file):
 
@@ -49,12 +49,15 @@ for im in images:
             points[13:15],
         )
 
+        v1, v2, v3, v4 = points[6], points[9], points[12], points[15]
+
         kpts = [kpts1, kpts2, kpts3, kpts4]
         for idx, (kw, kh) in enumerate(kpts):
             kpts[idx] = [int(kw * w), int(kh * h)]
 
         keypoints.extend(kpts)
         keypoints_class.append(_class)
+        visibility.append([v1, v2, v3, v4])
 
     kpts_np = np.array(keypoints, np.float32)
 
@@ -85,6 +88,8 @@ for im in images:
         for idx, k in enumerate(g):
             kpts[i, idx, 0] = k[0] / w
             kpts[i, idx, 1] = k[1] / h
+            if k[2] != 0:
+                kpts[i, idx, 2] = visibility[i, idx]
 
     out_name = filename + "_" + str(time_ns())
     out_path = Path(str(out_images_folder / out_name) + ".jpg")
