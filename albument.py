@@ -23,7 +23,6 @@ def augment(image, bboxes, kpts, isCoco):
         bbox_params=A.BboxParams(
             format="coco" if isCoco else "yolo",
             label_fields=["class_labels"],
-            check_each_transform=False,
         ),
         keypoint_params=A.KeypointParams(format="xy", remove_invisible=False),
     )
