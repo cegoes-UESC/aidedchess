@@ -29,7 +29,7 @@ for im in images:
     image = cv.imread(str(im.absolute()), cv.IMREAD_COLOR)
     h, w = image.shape[0:2]
 
-    bboxes, bboxes_class, keypoints, keypoints_class, visibility = [], [], [], [], []
+    bboxes, keypoints, visibility = [], [], []
     c = []
 
     targets, arguments = {}, {}
