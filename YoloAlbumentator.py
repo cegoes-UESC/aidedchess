@@ -1,5 +1,4 @@
 import cv2 as cv
-import numpy as np
 from pathlib import Path
 from time import time_ns
 from albument import augment
@@ -31,15 +30,26 @@ for im in images:
     h, w = image.shape[0:2]
 
     bboxes, bboxes_class, keypoints, keypoints_class, visibility = [], [], [], [], []
+    c = []
+
+    targets, arguments = {}, {}
+
+    size = 0
 
     for item_idx, l in enumerate(label_file):
+        size = size + 1
+        bboxes, keypoints = [], []
+
+        if item_idx != 0:
+            targets["bboxes" + str(item_idx - 1)] = "bboxes"
+            targets["keypoints" + str(item_idx - 1)] = "keypoints"
 
         labels_content = l.split(" ")
         _class = int(labels_content[0])
 
         points = list(map(float, labels_content[1:]))
-        bboxes.append(points[0:4])
-        bboxes_class.append(_class)
+        bboxes.extend(points[0:4])
+        bboxes.append(_class)
 
         kpts1, kpts2, kpts3, kpts4 = (
             points[4:6],
@@ -55,15 +65,17 @@ for im in images:
             kpts[idx] = [int(kw * w), int(kh * h)]
 
         keypoints.extend(kpts)
-        keypoints_class.append(_class)
         visibility.append([v1, v2, v3, v4])
 
-    kpts_np = np.array(keypoints, np.float32)
+        if item_idx == 0:
+            arguments["bboxes"] = [bboxes]
+            arguments["keypoints"] = keypoints
+        else:
+            arguments["bboxes" + str(item_idx - 1)] = [bboxes]
+            arguments["keypoints" + str(item_idx - 1)] = keypoints
 
-    b = [bboxes, bboxes_class]
-    k = [kpts_np, keypoints_class]
+    im, bboxes, kpts, classes = augment(image, targets, arguments, size, False)
 
-    im, bboxes, kpts, classes = augment(image, b, k, False)
     h, w = im.shape[:2]
 
     kpts = kpts.reshape((len(classes), 4, 3))

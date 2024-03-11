@@ -83,11 +83,21 @@ for im in images:
     add_image(current_image_id, out_name + ".jpg", w, h)
     ann = get_image_annotations(id)
 
-    classes, bboxes, keypoints, visibility = [], [], [], []
+    bboxes, keypoints, visibility = [], [], []
 
-    for a in ann:
-        classes.append(a["category_id"])
-        bboxes.append(a["bbox"])
+    targets, arguments = {}, {}
+    size = 0
+
+    for item_idx, a in enumerate(ann):
+        size = size + 1
+        bboxes = [], keypoints = []
+
+        if item_idx != 0:
+            targets["bboxes" + str(item_idx - 1)] = "bboxes"
+            targets["keypoints" + str(item_idx - 1)] = "keypoints"
+
+        bboxes.extend(a["bbox"])
+        bboxes.extend(a["category_id"])
 
         kp_np = np.array(a["keypoints"])
         kp_np = kp_np.reshape((4, 3))
@@ -97,8 +107,12 @@ for im in images:
             v.append(k[2])
         visibility.append(v)
 
-    b = [bboxes, classes]
-    k = [keypoints, classes]
+        if item_idx == 0:
+            arguments["bboxes"] = [bboxes]
+            arguments["keypoints"] = keypoints
+        else:
+            arguments["bboxes" + str(item_idx - 1)] = [bboxes]
+            arguments["keypoints" + str(item_idx - 1)] = keypoints
 
     for idx, bbb in enumerate(bboxes):
         if bbb[2] == 0:
@@ -106,7 +120,7 @@ for im in images:
         if bbb[3] == 0:
             bboxes[idx][3] = 1
 
-    im, bboxes, kpts, classes = augment(image, b, k, True)
+    im, bboxes, kpts, classes = augment(image, targets, arguments, size, True)
 
     h, w = im.shape[:2]
     kpts = kpts.reshape((len(classes), 4, 3))

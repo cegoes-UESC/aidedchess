@@ -3,7 +3,7 @@ import numpy as np
 import albumentations as A
 
 
-def augment(image, bboxes, kpts, isCoco):
+def augment(image, targets, arguments, length, isCoco):
 
     transform = A.Compose(
         [
@@ -22,26 +22,33 @@ def augment(image, bboxes, kpts, isCoco):
         ],
         bbox_params=A.BboxParams(
             format="coco" if isCoco else "yolo",
-            label_fields=["class_labels"],
         ),
         keypoint_params=A.KeypointParams(format="xy", remove_invisible=False),
+        additional_targets=targets,
     )
 
-    trans = transform(
-        image=image,
-        bboxes=bboxes[0],
-        keypoints=kpts[0],
-        class_labels=bboxes[1],
-        keypoints_classes=kpts[1],
-    )
+    trans = transform(image=image, **arguments)
     trans_image = trans["image"]
     h, w = trans_image.shape[:2]
 
-    kps = np.array(trans["keypoints"])
-    ones = np.ones((kps.shape[0], 1), dtype=np.int32)
+    keypoints, bboxes, classes = [], [], []
 
-    kps = np.hstack([kps, ones])
-    out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
-    kps[out] = 0
+    for i in range(length):
+        if i == 0:
+            kkey, bkey = "keypoints", "bboxes"
+        else:
+            kkey, bkey = "keypoints" + str(i - 1), "bboxes" + str(i - 1)
 
-    return trans["image"], trans["bboxes"], kps, trans["class_labels"]
+        kps = np.array(trans[kkey], np.float32)
+        ones = np.ones((kps.shape[0], 1), dtype=np.int32)
+
+        kps = np.hstack([kps, ones])
+        out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
+        kps[out] = 0
+
+        if len(trans[bkey]) != 0:
+            keypoints.append(kps)
+            bboxes.append(trans[bkey][0][:4])
+            classes.append(trans[bkey][0][4])
+
+    return trans["image"], bboxes, np.array(keypoints, np.float32), classes
