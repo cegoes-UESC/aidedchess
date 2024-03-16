@@ -28,7 +28,7 @@ try:
     os.mkdir(PATH + "/images/val")
 except:
     print("Maybe dirs already exists, check")
-    pass
+    exit(0)
 
 val_path = Path(PATH + "/labels/val")
 train_path = Path(PATH + "/labels/train")
