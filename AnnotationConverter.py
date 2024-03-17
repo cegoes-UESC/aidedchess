@@ -1,11 +1,8 @@
-from ultralytics.data.converter import convert_coco
-from sys import argv
-from pathlib import Path
 import json
+from pathlib import Path
+from ultralytics.data.converter import convert_coco
 
-PATH = argv[1]
-
-path = Path("annotations/" + PATH)
+path = Path("annotations/")
 files = list(path.glob("*.json"))
 
 for f in files:
@@ -23,11 +20,15 @@ for f in files:
 
 def convert():
     convert_coco(
-        "annotations/" + PATH,
+        "annotations/",
         "conversion/converted/",
         use_keypoints=True,
         cls91to80=False,
     )
+    converted = Path("conversion/converted/labels")
+    labels = converted.rglob("*.txt")
+    for file in labels:
+        file.rename("datasets/chess/labels/" + file.name)
 
 
 convert()
