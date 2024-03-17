@@ -1,7 +1,7 @@
 import math, os, random
 from pathlib import Path
 
-PATH = "datasets/split"
+PATH = "datasets/chess"
 
 labels_dir = Path(PATH + "/labels")
 images_dir = Path(PATH + "/images")
@@ -21,15 +21,6 @@ print(IMAGE_COUNT, RATIO, train_count, val_count, train_count + val_count)
 val_images = labels[:val_count]
 train_images = labels[val_count:]
 
-try:
-    os.mkdir(PATH + "/labels/train")
-    os.mkdir(PATH + "/labels/val")
-    os.mkdir(PATH + "/images/train")
-    os.mkdir(PATH + "/images/val")
-except:
-    print("Maybe dirs already exists, check")
-    exit(0)
-
 val_path = Path(PATH + "/labels/val")
 train_path = Path(PATH + "/labels/train")
 
@@ -39,7 +30,7 @@ images_train_path = Path(PATH + "/images/train")
 print("Copying VAL labels")
 for i in val_images:
     name = i.name.split(".")[0]
-    imagename = name + ".jpg"
+    imagename = name + ".JPG"
     os.rename(i.resolve(), (val_path / i.name).resolve())
     os.rename(
         (images_dir / imagename).resolve(),
@@ -49,7 +40,7 @@ for i in val_images:
 print("Copying TRAIN labels")
 for i in train_images:
     name = i.name.split(".")[0]
-    imagename = name + ".jpg"
+    imagename = name + ".JPG"
     os.rename(i.resolve(), (train_path / i.name).resolve())
     os.rename(
         (images_dir / imagename).resolve(),
