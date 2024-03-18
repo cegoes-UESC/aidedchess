@@ -12,6 +12,8 @@ images = os.listdir(str(IMAGES_PATH.absolute()))
 
 images = list(map(lambda i: i.split("."), images))
 
+LEN_IMAGES = len(images)
+
 data = {
     "images": [],
     "annotations": [],
@@ -165,7 +167,9 @@ def add_annotations(id, label_name, h, w, ann_id):
     return ann_id
 
 
-for label in labels:
+for idx, label in enumerate(labels):
+
+    print(f"=== Processing {idx+1}/{LEN_IMAGES} ===")
 
     name = label.split(".")[0]
     image = list(filter(lambda i: i[0] == name, images))[0]
@@ -190,9 +194,8 @@ for label in labels:
     )
     ann_id = add_annotations(image_id, label, h, w, ann_id)
     image_id = image_id + 1
-    print(f'Image "{image_name}" done!')
 
-out_path = Path("annotations")
+out_path = Path("annotations/yolo")
 
 out = open(str((out_path / "yolo-to-coco.json").absolute()), "w")
 
