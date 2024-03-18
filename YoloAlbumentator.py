@@ -19,7 +19,10 @@ images = list(imagesj) + list(imagesJ)
 out_images_folder = Path("datasets/albumented/images/train")
 out_labels_folder = Path("datasets/albumented/labels/train")
 
-for im in images:
+LEN_IMAGES = len(images)
+
+for idx, im in enumerate(images):
+    print(f"=== Processing image {idx+1}/{LEN_IMAGES} ===")
     filename = im.name.split(".")[0]
     label_name = filename + ".txt"
 
@@ -113,7 +116,9 @@ for im in images:
         args = []
         args.append(i)
 
-        for b in bboxes[idx]:
+        for b_idx, b in enumerate(bboxes[idx]):
+            if (b_idx == 2 and b == 0) or (b_idx == 3 and b == 0):
+                b = 0.1
             args.append(b)
 
         for k in kpts[idx]:
@@ -125,4 +130,3 @@ for im in images:
         out_labels_file.flush()
 
     out_labels_file.close()
-    print("Image saved")
