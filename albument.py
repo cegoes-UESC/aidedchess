@@ -46,7 +46,10 @@ def augment(image, targets, arguments, length, isCoco):
         out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
         kps[out] = 0
 
-        if len(trans[bkey]) != 0:
+        hasKpts = kps[:, 2] != 0
+        hasKpts = np.any(hasKpts)
+
+        if len(trans[bkey]) != 0 and hasKpts:
             keypoints.append(kps)
             bboxes.append(trans[bkey][0][:4])
             classes.append(trans[bkey][0][4])
