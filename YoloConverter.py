@@ -1,6 +1,6 @@
 import cv2 as cv
 from pathlib import Path
-import os, json, datetime
+import os, json
 
 BASE_DIR = Path("datasets/albumented")
 
@@ -192,12 +192,7 @@ for label in labels:
     image_id = image_id + 1
     print(f'Image "{image_name}" done!')
 
-today = datetime.datetime.now().strftime("%Y-%m-%d")
-
-out_path = Path("annotations/" + today)
-
-if not out_path.is_dir():
-    out_path.mkdir(755)
+out_path = Path("annotations")
 
 out = open(str((out_path / "yolo-to-coco.json").absolute()), "w")
 
