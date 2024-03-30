@@ -304,27 +304,29 @@ class Board:
                 Line.printLine(bestLines, line)
                 Line.printLine(resize, line)
                 center = Line.getIntersectionPoint(middleVertical, line)
-                line[7] = int(center[0])
-                line[8] = int(center[1])
-                line[9] = int(
-                    sqrt(
-                        pow(line[7] - verticalPivotPoint[0], 2)
-                        + pow(line[8] - verticalPivotPoint[1], 2)
+                if center is not None:
+                    line[7] = int(center[0])
+                    line[8] = int(center[1])
+                    line[9] = int(
+                        sqrt(
+                            pow(line[7] - verticalPivotPoint[0], 2)
+                            + pow(line[8] - verticalPivotPoint[1], 2)
+                        )
                     )
-                )
 
             for line in vs_np:
                 Line.printLine(bestLines, line, (255, 0, 0))
                 Line.printLine(resize, line, (255, 0, 0))
                 center = Line.getIntersectionPoint(middleHorizontal, line)
-                line[7] = int(center[0])
-                line[8] = int(center[1])
-                line[9] = int(
-                    sqrt(
-                        pow(line[7] - horizontalPivotPoint[0], 2)
-                        + pow(line[8] - horizontalPivotPoint[1], 2)
+                if center is not None:
+                    line[7] = int(center[0])
+                    line[8] = int(center[1])
+                    line[9] = int(
+                        sqrt(
+                            pow(line[7] - horizontalPivotPoint[0], 2)
+                            + pow(line[8] - horizontalPivotPoint[1], 2)
+                        )
                     )
-                )
 
             hs_np = hs_np[hs_np[:, 9].argsort()]
             vs_np = vs_np[vs_np[:, 9].argsort()]
