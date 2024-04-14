@@ -8,11 +8,18 @@ from Perspective import Perspective
 model = YOLO("models/pose.pt")
 
 
-image = Path("datasets/chess/images/train/IMG_2610.jpg")
+image = Path("images/IMG_2658.jpg")
 
-prediction = model.predict(image.resolve(), verbose=False, classes=[0], save=False)
+prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
-boardKeypoints = np.float32(prediction[0].keypoints.xy.tolist()[0])
+
+classes, keypoints = prediction.boxes.cls, prediction.keypoints.xy
+
+for c, k in zip(classes, keypoints):
+    if c.item() == 0:
+        boardKeypoints = np.float32(k.tolist())
+        continue
+    print(c.item(), k)
 
 im = cv.imread(str(image.resolve()))
 
