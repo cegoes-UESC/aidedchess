@@ -5,7 +5,7 @@ from pathlib import Path
 from ultralytics import YOLO
 from Perspective import Perspective
 
-model = YOLO("models/best.pt")
+model = YOLO("models/pose.pt")
 
 
 image = Path("datasets/chess/images/train/IMG_2610.jpg")
