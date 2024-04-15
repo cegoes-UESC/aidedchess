@@ -429,4 +429,4 @@ class Board:
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
-        return resize, centers, (hs, vs)
+        return resize, centers, (hs, vs), squares
