@@ -1,10 +1,9 @@
 import numpy as np
 import cv2 as cv
+from math import sqrt, pow
+import random
 
 from sklearn.cluster import AgglomerativeClustering
-
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class Line:
@@ -46,7 +45,7 @@ class Line:
             for index, line in enumerate(it):
                 rho1, theta1, acc1 = line[0], line[1], line[2]
 
-                dist = np.sqrt(np.power((rho - rho1) + (theta - theta1), 2))
+                dist = np.sqrt(np.power(rho - rho1, 2) + np.power(theta - theta1, 2))
                 if dist < th:
                     if acc > acc1:
                         del bestLines[index]
@@ -78,8 +77,8 @@ class Line:
 
 
 class Canny:
-    low = 0
-    high = 370
+    low = 140
+    high = 240
 
     def setLow(self, value):
         if value <= 0:
@@ -97,7 +96,7 @@ class Canny:
 class Hough:
     rho = 1
     theta = np.pi / 180
-    threshold = 80
+    threshold = 100
 
     def setRho(self, value):
         if value <= 0:
@@ -284,18 +283,71 @@ class Board:
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
 
-            for line in hs:
+            verticals, horizontals = np.zeros((500, 500, 3)), np.zeros((500, 500, 3))
+
+            middleHorizontal = (0, 0, 0, 0, 250, 500, 250)
+            middleVertical = (0, 0, 0, 250, 0, 250, 500)
+
+            Line.printLine(horizontals, middleVertical, (255, 0, 0))
+            Line.printLine(verticals, middleHorizontal, (255, 0, 0))
+
+            horizontalPivotPoint = (0, 250)
+            verticalPivotPoint = (250, 0)
+
+            hs_np = np.array(hs)
+            vs_np = np.array(vs)
+
+            hs_np = np.hstack((hs_np, np.zeros((hs_np.shape[0], 3), dtype=hs_np.dtype)))
+            vs_np = np.hstack((vs_np, np.zeros((vs_np.shape[0], 3), dtype=vs_np.dtype)))
+
+            for line in hs_np:
                 Line.printLine(bestLines, line)
                 Line.printLine(resize, line)
+                center = Line.getIntersectionPoint(middleVertical, line)
+                if center is not None:
+                    line[7] = int(center[0])
+                    line[8] = int(center[1])
+                    line[9] = int(
+                        sqrt(
+                            pow(line[7] - verticalPivotPoint[0], 2)
+                            + pow(line[8] - verticalPivotPoint[1], 2)
+                        )
+                    )
 
-            for line in vs:
+            for line in vs_np:
                 Line.printLine(bestLines, line, (255, 0, 0))
                 Line.printLine(resize, line, (255, 0, 0))
+                center = Line.getIntersectionPoint(middleHorizontal, line)
+                if center is not None:
+                    line[7] = int(center[0])
+                    line[8] = int(center[1])
+                    line[9] = int(
+                        sqrt(
+                            pow(line[7] - horizontalPivotPoint[0], 2)
+                            + pow(line[8] - horizontalPivotPoint[1], 2)
+                        )
+                    )
+
+            hs_np = hs_np[hs_np[:, 9].argsort()]
+            vs_np = vs_np[vs_np[:, 9].argsort()]
+
+            for line in hs_np:
+                Line.printLine(horizontals, line, (255, 255, 255))
+
+            for line in vs_np:
+                Line.printLine(verticals, line, (255, 255, 255))
 
             inter = np.zeros((500, 500, 3))
-            for h in hs:
-                for v in vs:
+            centers = []
+
+            inter_np = np.zeros((hs_np.shape[0], vs_np.shape[0], 2))
+
+            for h_idx, h in enumerate(hs_np):
+                for v_idx, v in enumerate(vs_np):
                     center = Line.getIntersectionPoint(h, v)
+                    centers.append(center)
+
+                    inter_np[h_idx, v_idx] = [center[0], center[1]]
 
                     if center is not None:
                         cv.drawMarker(
@@ -315,6 +367,50 @@ class Board:
                             thickness=3,
                         )
 
+            s = inter_np.shape
+            x0, y0 = s[0], s[1]
+
+            squares = []
+
+            squares_overlay = resize.copy()
+
+            for i in range(0, x0 - 1):
+                for j in range(0, y0 - 1):
+
+                    sq = (
+                        inter_np[i][j],
+                        inter_np[i + 1][j],
+                        inter_np[i + 1][j + 1],
+                        inter_np[i][j + 1],
+                    )
+
+                    ran = random.Random()
+
+                    r, g, b = (
+                        ran.randint(0, 255),
+                        ran.randint(0, 255),
+                        ran.randint(0, 255),
+                    )
+
+                    cv.fillConvexPoly(
+                        squares_overlay,
+                        np.array(
+                            [
+                                [
+                                    [sq[0][0], sq[0][1]],
+                                    [sq[1][0], sq[1][1]],
+                                    [sq[2][0], sq[2][1]],
+                                    [sq[3][0], sq[3][1]],
+                                ]
+                            ],
+                            dtype=np.int32,
+                        ),
+                        (b, g, r),
+                    )
+                    squares.append(sq)
+
+            final_square = cv.addWeighted(squares_overlay, 0.4, resize, 1 - 0.4, 0)
+
             angles = l[:, 1]
             angles = np.sort(angles)
             grad = np.gradient(angles)
@@ -325,9 +421,12 @@ class Board:
                 cv.imshow("Vertical-Horizontal", coloredLines)
                 cv.imshow("Best Vertical-Horizontal", bestLines)
                 cv.imshow("Intersections", inter)
+                cv.imshow("Vertical Lines", verticals)
+                cv.imshow("Horizontal Lines", horizontals)
+                cv.imshow("Squares", final_square)
                 cv.imshow("Result", resize)
 
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
-        return resize
+        return resize, centers, (hs, vs), squares

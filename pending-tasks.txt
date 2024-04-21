@@ -1,0 +1,35 @@
+* Detecção Tabuleiro (Keypoints)
+* Detecção Peças (Keypoints)
+* Auto anotação
+* Correção Perspectiva
+
++ Mais fotos
+? Optuna ou Tuner do YOLO
++ 8 linhas e colunas (Casas)
+- Inserir as posições possíveis das peças
+
+---
+
+-> Aumentação das imagens:
+    - jogar as anotações no roboflow
+    - ou usar o pytorch (lembrar de garantir que as keypoints serão corrigidas)
+    * Ao treinar, desativar as aumentações do YOLO (as imagens já estariam aumentadas)
+
+-> Verificar YOLO-nas
+    -> Testar a versão M
+
+-> Verificar e adicionar ao artigo sistemas similares
+
+https://albumentations.ai/docs/getting_started/keypoints_augmentation/ -> citação no final da página inicial
+
+-> Usar o optuna por ser mais completo que o tuning e deixar rodando com os mesmos parâmetros
+
+---
+
+-> Configurar o Optuna para melhorar o fitness (depois)
+
+-> Corrigir o problema do ambiente do Kaggle
+-> Adicionar dropout no treinamento do YOLO (0 a 20)
+    -> Estudar funcionamento e melhoria do dropout
+    -> Iniciar com 5%
+-> Marcar os pontos não visíveis através do CVAT
