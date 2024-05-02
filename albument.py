@@ -30,6 +30,7 @@ def augment(image, targets, arguments, length, isCoco):
     isValid = False
 
     while not isValid:
+        isValid = True
         trans = transform(image=image, **arguments)
         trans_image = trans["image"]
         h, w = trans_image.shape[:2]
