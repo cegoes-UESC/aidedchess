@@ -27,31 +27,41 @@ def augment(image, targets, arguments, length, isCoco):
         additional_targets=targets,
     )
 
-    trans = transform(image=image, **arguments)
-    trans_image = trans["image"]
-    h, w = trans_image.shape[:2]
+    isValid = False
 
-    keypoints, bboxes, classes = [], [], []
+    while not isValid:
+        trans = transform(image=image, **arguments)
+        trans_image = trans["image"]
+        h, w = trans_image.shape[:2]
 
-    for i in range(length):
-        if i == 0:
-            kkey, bkey = "keypoints", "bboxes"
-        else:
-            kkey, bkey = "keypoints" + str(i - 1), "bboxes" + str(i - 1)
+        keypoints, bboxes, classes = [], [], []
 
-        kps = np.array(trans[kkey], np.float32)
-        ones = np.ones((kps.shape[0], 1), dtype=np.int32)
+        for i in range(length):
+            if i == 0:
+                kkey, bkey = "keypoints", "bboxes"
+            else:
+                kkey, bkey = "keypoints" + str(i - 1), "bboxes" + str(i - 1)
 
-        kps = np.hstack([kps, ones])
-        out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
-        kps[out] = 0
+            kps = np.array(trans[kkey], np.float32)
+            ones = np.ones((kps.shape[0], 1), dtype=np.int32)
 
-        hasKpts = kps[:, 2] != 0
-        hasKpts = np.any(hasKpts)
+            kps = np.hstack([kps, ones])
+            out = (kps[:, 0] < 0) | (kps[:, 0] > w) | (kps[:, 1] < 0) | (kps[:, 1] > h)
+            kps[out] = 0
 
-        if len(trans[bkey]) != 0 and hasKpts:
-            keypoints.append(kps)
-            bboxes.append(trans[bkey][0][:4])
-            classes.append(trans[bkey][0][4])
+            hasKpts = kps[:, 2] != 0
+            hasKpts = np.any(hasKpts)
+
+            hasOffScreen = kps[:, 2] == 0
+            hasOffScreen = np.any(hasOffScreen)
+
+            if hasOffScreen:
+                isValid = False
+                break
+
+            if len(trans[bkey]) != 0 and hasKpts:
+                keypoints.append(kps)
+                bboxes.append(trans[bkey][0][:4])
+                classes.append(trans[bkey][0][4])
 
     return trans["image"], bboxes, np.array(keypoints, np.float32), classes
