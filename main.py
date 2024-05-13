@@ -7,15 +7,23 @@ from Perspective import Perspective
 from ChessPiece import ChessPiece
 
 model = YOLO("models/pose.pt")
-image = Path("images/IMG_2658.jpg")
+
+image = Path("datasets/chess/images/train/IMG_3389.JPG")
+
 prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
 classes, keypoints = prediction.boxes.cls, prediction.keypoints.xy
 
+boardKeypoints = None
+
 for c, k in zip(classes, keypoints):
     if c.item() == 0:
         boardKeypoints = np.float32(k.tolist())
-        continue
+        break
+
+if boardKeypoints is None:
+    print("No chessboard detected")
+    exit(0)
 
 im = cv.imread(str(image.resolve()))
 squares_overlay = im.copy()
@@ -26,7 +34,12 @@ boardPerspective = perspective.apply()
 board = Board(debug=True)
 board.setImage(boardPerspective)
 
-boardResized, centers, (horizontal, vertical), squares = board.process()
+try:
+    boardResized, centers, (horizontal, vertical), squares = board.process()
+except:
+    print("It was not possible to process the board")
+    exit(0)
+
 boardSquares = perspective.undoPerspective(np.array(squares))
 
 centroids, chessboard = [], []
@@ -50,12 +63,11 @@ for sq in boardSquares:
     item.append(sq)
     for c in centroids:
         p = np.array(sq, dtype=np.float32)
-        if cv.pointPolygonTest(p, c, False) > 0:
+        if len(item) == 1 and cv.pointPolygonTest(p, c, False) > 0:
             item.append(c)
     if len(item) == 1:
         item.append(0)
     chessboard.append(item)
-
 
 for sq, c in chessboard:
     if c == 0:
@@ -94,8 +106,22 @@ for sq, c in chessboard:
         (255, 255, 0),
     )
 
+for idx, p in enumerate(boardKeypoints):
+    cv.putText(
+        im,
+        str(idx),
+        (int(p[0]), int(p[1])),
+        cv.FONT_HERSHEY_PLAIN,
+        6,
+        (0, 0, 255),
+        15,
+        cv.LINE_8,
+    )
+    # cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 25, 15)
 
 im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
+
+cv.imwrite("board/" + image.name, im)
 
 cv.namedWindow("markers", cv.WINDOW_GUI_EXPANDED)
 while True:
