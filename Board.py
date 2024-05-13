@@ -215,7 +215,7 @@ class Board:
             )
 
             if lines is None or len(lines) < 2:
-                return resize
+                raise ValueError("No lines detected")
 
             l = np.empty((0, 7))
             for ll in lines:
