@@ -5,10 +5,11 @@ from pathlib import Path
 from ultralytics import YOLO
 from Perspective import Perspective
 from ChessPiece import ChessPiece
+from utils import getBoardKeypoints, convertToPx
 
-model = YOLO("models/pose.pt")
+model = YOLO("models/best.pt")
 
-image = Path("datasets/chess/images/train/IMG_3389.JPG")
+image = Path("datasets/chess/images/train/test.JPG")
 
 prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
@@ -21,6 +22,20 @@ for c, k in zip(classes, keypoints):
         boardKeypoints = np.float32(k.tolist())
         break
 
+# -> DEBUG <-
+
+kpts = getBoardKeypoints(image)
+im = cv.imread(str(image.resolve()))
+kkk = convertToPx(im, kpts)
+
+kkk = list(map(float, kkk))
+kkk = np.array(kkk)
+kkk = kkk.reshape((4, 2))
+kkk = np.float32(kkk.tolist())
+boardKeypoints = kkk
+
+# -> DEBUG <-
+
 if boardKeypoints is None:
     print("No chessboard detected")
     exit(0)
@@ -31,7 +46,7 @@ squares_overlay = im.copy()
 perspective = Perspective(im, boardKeypoints)
 boardPerspective = perspective.apply()
 
-board = Board(debug=True)
+board = Board(debug=False)
 board.setImage(boardPerspective)
 
 try:
@@ -107,17 +122,7 @@ for sq, c in chessboard:
     )
 
 for idx, p in enumerate(boardKeypoints):
-    cv.putText(
-        im,
-        str(idx),
-        (int(p[0]), int(p[1])),
-        cv.FONT_HERSHEY_PLAIN,
-        6,
-        (0, 0, 255),
-        15,
-        cv.LINE_8,
-    )
-    # cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 25, 15)
+    cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 10, 5)
 
 im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
 
