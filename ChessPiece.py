@@ -100,7 +100,7 @@ class ChessPiece:
         cv.drawMarker(
             image,
             (int(self.x), int(self.y)),
-            (255, 0, 255),
+            (0, 0, 255),
             cv.MARKER_DIAMOND,
             20,
             15,
