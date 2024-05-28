@@ -60,10 +60,12 @@ class ChessBoardData:
 class ChessBoard:
 
     data: list[list[ChessBoardData]]
+    points: list = []
 
-    def __init__(self) -> None:
+    def __init__(self, points: list) -> None:
         arr = np.zeros((8, 8))
         self.data = arr.tolist()
+        self.points = points
 
     def addData(self, i, j, data):
         self.data[i][j] = data
@@ -76,6 +78,22 @@ class ChessBoard:
                     r.cell.draw(image)
                     if r.piece is not None:
                         r.piece.draw(image)
+
+        # cv.fillConvexPoly(
+        #     image,
+        #     np.array(
+        #         [
+        #             [
+        #                 [self.points[0][0], self.points[0][1]],
+        #                 [self.points[1][0], self.points[1][1]],
+        #                 [self.points[2][0], self.points[2][1]],
+        #                 [self.points[3][0], self.points[3][1]],
+        #             ]
+        #         ],
+        #         dtype=np.int32,
+        #     ),
+        #     (0, 0, 255),
+        # )
 
     def getBoardData(self, i, j) -> ChessBoardData | None:
         return self.data[i][j] if isinstance(self.data[i][j], ChessBoardData) else None

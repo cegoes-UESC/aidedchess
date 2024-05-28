@@ -73,15 +73,15 @@ for c, k in zip(classes, keypoints):
 
     pieces.append(piece)
 
-bs = np.array(boardSquares)
-bs = bs.reshape((8, 8, 4, 2))
+boardSquares = np.array(boardSquares)
+boardSquares = boardSquares.reshape((8, 8, 4, 2))
 
-chessboard = ChessBoard()
+chessboard = ChessBoard(boardKeypoints)
 
-for i, l in enumerate(bs):
-    for j, r in enumerate(l):
+for i, _ in enumerate(boardSquares):
+    for j, square in enumerate(_):
 
-        cell = ChessBoardCell(r)
+        cell = ChessBoardCell(square)
 
         cellData = ChessBoardData(cell)
 
@@ -89,7 +89,7 @@ for i, l in enumerate(bs):
 
         for piece in pieces:
             centroid = piece.getCentroid()
-            cell_f32 = np.array(r, dtype=np.float32)
+            cell_f32 = np.array(square, dtype=np.float32)
             if cv.pointPolygonTest(cell_f32, centroid, False) > 0:
                 cellData = chessboard.getBoardData(i, j)
                 if cellData.piece is not None:
