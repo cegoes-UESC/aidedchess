@@ -1,5 +1,18 @@
-from enum import IntEnum
-from typing import List, Tuple
+from enum import Enum, IntEnum
+
+
+class PieceType(str, Enum):
+    PAWN = "pawn"
+    ROOK = "rook"
+    BISHOP = "bishop"
+    KNIGHT = "knight"
+    QUEEN = "queen"
+    KING = "king"
+
+
+class PieceColor(str, Enum):
+    BLACK = "black"
+    WHITE = "white"
 
 
 class PieceClass(IntEnum):
@@ -20,7 +33,7 @@ class PieceClass(IntEnum):
 class ChessPiece:
 
     cls: PieceClass
-    points: List[Tuple[int, int]]
+    points: list[tuple[int, int]]
 
     def __init__(self) -> None:
         self.cls = 0
@@ -35,7 +48,7 @@ class ChessPiece:
             y = y + i[1]
         return int(1 / 3 * x), int(1 / 3 * y)
 
-    def addPoint(self, point: Tuple[int, int]) -> None:
+    def addPoint(self, point: tuple[int, int]) -> None:
         self.points.append(point)
 
     def setClass(self, cls: PieceClass) -> None:
