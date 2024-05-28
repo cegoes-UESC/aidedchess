@@ -63,13 +63,15 @@ pieces = []
 
 for c, k in zip(classes, keypoints):
 
+    if c.item() == 0:
+        continue
+
     piece = ChessPiece()
     piece.setClass(int(c.item()))
 
-    if c.item() == 0:
-        continue
     for idx, i in enumerate(k):
         piece.addPoint(i)
+
     centroid = piece.getCentroid()
     centroids.append(centroid)
 
