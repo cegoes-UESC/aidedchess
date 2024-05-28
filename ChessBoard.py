@@ -3,15 +3,30 @@ import numpy as np
 from ChessPiece import ChessPiece
 
 
+class CellState:
+    EMPTY = 0
+    OCCUPIED = 1
+    SELECTED = 2
+    CAPTURABLE = 3
+
+
 class ChessBoardCell:
     points: list[float]
-    color: tuple[int, int, int]
+    state: CellState = 0
 
     def __init__(self, points) -> None:
         self.points = points
-        self.color = (125, 10, 71)
 
     def draw(self, image) -> None:
+
+        color = (255, 255, 255)
+
+        if self.state == CellState.OCCUPIED:
+            color = (0, 255, 0)
+        elif self.state == CellState.SELECTED:
+            color = (255, 0, 0)
+        elif self.state == CellState.CAPTURABLE:
+            color = (0, 0, 255)
 
         cv.fillConvexPoly(
             image,
@@ -26,11 +41,11 @@ class ChessBoardCell:
                 ],
                 dtype=np.int32,
             ),
-            self.color,
+            color,
         )
 
-    def setColor(self, color: tuple[int, int, int]) -> None:
-        self.color = color
+    def setState(self, state: CellState) -> None:
+        self.state = state
 
 
 class ChessBoardData:
@@ -57,4 +72,10 @@ class ChessBoard:
 
         for l in self.data:
             for r in l:
-                r.cell.draw(image)
+                if isinstance(r, ChessBoardData):
+                    r.cell.draw(image)
+                    if r.piece is not None:
+                        r.piece.draw(image)
+
+    def getBoardData(self, i, j) -> ChessBoardData | None:
+        return self.data[i][j] if isinstance(self.data[i][j], ChessBoardData) else None
