@@ -33,12 +33,14 @@ class PieceClass(IntEnum):
 class ChessPiece:
 
     cls: PieceClass
-    type: PieceType
-    color: PieceColor
+    type: PieceType = None
+    color: PieceColor = None
     points: list[tuple[int, int]]
+    x: int = 0
+    y: int = 0
 
     def __init__(self) -> None:
-        self.cls = 0
+        self.cls = -1
         self.points = []
 
     def getCentroid(self) -> float:
@@ -48,7 +50,10 @@ class ChessPiece:
                 continue
             x = x + i[0]
             y = y + i[1]
-        return int(1 / 3 * x), int(1 / 3 * y)
+        x, y = int(1 / 3 * x), int(1 / 3 * y)
+        self.x = x
+        self.y = y
+        return x, y
 
     def addPoint(self, point: tuple[int, int]) -> None:
         self.points.append(point)
@@ -84,3 +89,8 @@ class ChessPiece:
             type = PieceType.KING
 
         return type, color
+
+    def __str__(self) -> str:
+        if self.color and self.type:
+            return f"A {self.color.value} {self.type.value} at ({self.x}, {self.y})"
+        return f"Empty Piece"
