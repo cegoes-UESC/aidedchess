@@ -1,16 +1,15 @@
 import cv2 as cv
 import numpy as np
 from ChessPiece import ChessPiece
-from typing import List, Tuple, Optional
 
 
 class ChessBoardCell:
-    points: List[float]
-    color: Tuple[int, int, int]
+    points: list[float]
+    color: tuple[int, int, int]
 
-    def __init__(self) -> None:
-        self.points = []
-        self.color = (0, 0, 0)
+    def __init__(self, points) -> None:
+        self.points = points
+        self.color = (125, 10, 71)
 
     def draw(self, image) -> None:
 
@@ -30,22 +29,32 @@ class ChessBoardCell:
             self.color,
         )
 
-    def setColor(self, color: Tuple[int, int, int]) -> None:
+    def setColor(self, color: tuple[int, int, int]) -> None:
         self.color = color
 
 
 class ChessBoardData:
     cell: ChessBoardCell
-    piece: Optional[ChessPiece] = None
+    piece: ChessPiece | None = None
 
-    def __init__(self) -> None:
-        self.piece = None
-        self.cell = None
+    def __init__(self, cell: ChessBoardCell, piece: ChessPiece | None = None) -> None:
+        self.cell = cell
+        self.piece = piece
 
 
 class ChessBoard:
 
-    data: List[List[ChessBoardData]]
+    data: list[list[ChessBoardData]]
 
     def __init__(self) -> None:
-        self.data = [[]]
+        arr = np.zeros((8, 8))
+        self.data = arr.tolist()
+
+    def addData(self, i, j, data):
+        self.data[i][j] = data
+
+    def draw(self, image) -> None:
+
+        for l in self.data:
+            for r in l:
+                r.cell.draw(image)
