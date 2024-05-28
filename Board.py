@@ -38,12 +38,14 @@ class Line:
 
         for l in lines:
             rho, theta, acc = l[0], l[1], l[2]
+            theta = Angle.getFixedAngle(theta)
             it = bestLines.copy()
 
             add = True
 
             for index, line in enumerate(it):
                 rho1, theta1, acc1 = line[0], line[1], line[2]
+                theta1 = Angle.getFixedAngle(theta1)
 
                 dist = np.sqrt(np.power(rho - rho1, 2) + np.power(theta - theta1, 2))
                 if dist < th:
@@ -76,8 +78,16 @@ class Line:
         return (px / den, py / den)
 
 
+class Angle:
+
+    @staticmethod
+    def getFixedAngle(theta):
+        return np.sqrt(np.power(theta - 0, 2))
+
+
 class Canny:
-    low = 140
+    # Antes: low = 140
+    low = 124
     high = 240
 
     def setLow(self, value):
@@ -210,7 +220,7 @@ class Board:
                 self.hough.rho,
                 self.hough.theta,
                 self.hough.threshold,
-                min_theta=-np.pi / 2,
+                min_theta=0,  # Antes: -np.pi / 2
                 max_theta=np.pi / 2,
             )
 
@@ -282,6 +292,11 @@ class Board:
             bestLines = np.zeros((500, 500, 3))
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
+
+            print(len(hs), len(vs))
+
+            # print(list(h[0] for h in hs))
+            # print(list(v[0] for v in vs))
 
             verticals, horizontals = np.zeros((500, 500, 3)), np.zeros((500, 500, 3))
 
