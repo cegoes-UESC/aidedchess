@@ -39,6 +39,7 @@ class ChessPiece:
     points: list[tuple[int, int]]
     x: int = 0
     y: int = 0
+    showKeypoints: bool = False
 
     def __init__(self) -> None:
         self.cls = -1
@@ -70,6 +71,9 @@ class ChessPiece:
 
     def setColor(self, color: PieceColor) -> None:
         self.color = color
+
+    def setShowKeypoints(self, show=False) -> None:
+        self.showKeypoints = show
 
     def _getTypeAndColorFromClass(self) -> tuple[PieceType, PieceColor]:
         type, color = None, None
@@ -105,3 +109,14 @@ class ChessPiece:
             20,
             15,
         )
+
+        if self.showKeypoints:
+            for p in self.points:
+                cv.drawMarker(
+                    image,
+                    (int(p[0]), int(p[1])),
+                    (255, 120, 70),
+                    cv.MARKER_DIAMOND,
+                    15,
+                    10,
+                )
