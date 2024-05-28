@@ -33,6 +33,8 @@ class PieceClass(IntEnum):
 class ChessPiece:
 
     cls: PieceClass
+    type: PieceType
+    color: PieceColor
     points: list[tuple[int, int]]
 
     def __init__(self) -> None:
@@ -53,3 +55,32 @@ class ChessPiece:
 
     def setClass(self, cls: PieceClass) -> None:
         self.cls = cls
+        type, color = self._getTypeAndColorFromClass()
+        self.setType(type)
+        self.setColor(color)
+
+    def setType(self, type: PieceType) -> None:
+        self.type = type
+
+    def setColor(self, color: PieceColor) -> None:
+        self.color = color
+
+    def _getTypeAndColorFromClass(self) -> tuple[PieceType, PieceColor]:
+        type, color = None, None
+
+        color = PieceColor.WHITE if self.cls % 2 == 0 else PieceColor.BLACK
+
+        if self.cls in [1, 2]:
+            type = PieceType.PAWN
+        elif self.cls in [3, 4]:
+            type = PieceType.ROOK
+        elif self.cls in [5, 6]:
+            type = PieceType.BISHOP
+        elif self.cls in [7, 8]:
+            type = PieceType.KNIGHT
+        elif self.cls in [9, 10]:
+            type = PieceType.QUEEN
+        elif self.cls in [11, 12]:
+            type = PieceType.KING
+
+        return type, color
