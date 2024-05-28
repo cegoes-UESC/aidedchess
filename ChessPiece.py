@@ -1,3 +1,4 @@
+import cv2 as cv
 from enum import Enum, IntEnum
 
 
@@ -94,3 +95,13 @@ class ChessPiece:
         if self.color and self.type:
             return f"A {self.color.value} {self.type.value} at ({self.x}, {self.y})"
         return f"Empty Piece"
+
+    def draw(self, image) -> None:
+        cv.drawMarker(
+            image,
+            (int(self.x), int(self.y)),
+            (255, 0, 255),
+            cv.MARKER_DIAMOND,
+            20,
+            15,
+        )
