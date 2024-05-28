@@ -5,20 +5,48 @@ import albumentations as A
 
 def augment(image, targets, arguments, length, isCoco):
 
+    affines = A.OneOf(
+        [
+            A.Affine(
+                shear=[-30, 30],
+                p=1,
+                fit_output=True,
+                rotate_method="ellipse",
+                mode=cv.BORDER_TRANSPARENT,
+            ),
+            A.Affine(
+                rotate=[-30, 30],
+                p=1,
+                fit_output=True,
+                rotate_method="ellipse",
+                mode=cv.BORDER_TRANSPARENT,
+            ),
+            A.Affine(
+                scale=[0.5, 1],
+                p=0.4,
+                fit_output=True,
+                rotate_method="ellipse",
+                mode=cv.BORDER_TRANSPARENT,
+            ),
+        ],
+        1,
+    )
+
     transform = A.Compose(
         [
             A.Normalize(),
             A.GaussianBlur(p=0.25),
             A.GaussNoise((0, 1), p=0.2),
             A.ColorJitter(),
-            A.ShiftScaleRotate(
-                p=0.5, border_mode=cv.BORDER_TRANSPARENT, rotate_method="ellipse"
-            ),
+            # A.ShiftScaleRotate(
+            #     p=0.5, border_mode=cv.BORDER_TRANSPARENT, rotate_method="ellipse"
+            # ),
             A.RandomBrightnessContrast(p=0.2),
-            A.Defocus(p=0.2),
-            A.Perspective(p=0.15),
-            A.VerticalFlip(p=0.25),
-            A.HorizontalFlip(p=0.25),
+            A.Defocus(p=0.15),
+            # A.Perspective(p=0.15),
+            # A.VerticalFlip(p=0.25),
+            # A.HorizontalFlip(p=0.25),
+            affines,
         ],
         bbox_params=A.BboxParams(
             format="coco" if isCoco else "yolo",
