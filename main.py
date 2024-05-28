@@ -6,6 +6,7 @@ from ultralytics import YOLO
 from Perspective import Perspective
 from ChessPiece import ChessPiece
 from utils import getBoardKeypoints, convertToPx
+from ChessBoard import ChessBoard, ChessBoardCell, ChessBoardData
 
 model = YOLO("models/best.pt")
 
@@ -75,6 +76,18 @@ for c, k in zip(classes, keypoints):
     centroid = piece.getCentroid()
     centroids.append(centroid)
 
+bs = np.array(boardSquares)
+bs = bs.reshape((8, 8, 4, 2))
+
+b = ChessBoard()
+
+for i, l in enumerate(bs):
+    for j, r in enumerate(l):
+        cell = ChessBoardCell(r)
+        cellData = ChessBoardData(cell)
+
+        b.addData(i, j, cellData)
+
 for sq in boardSquares:
     item = []
     item.append(sq)
@@ -88,44 +101,45 @@ for sq in boardSquares:
 
 for sq, c in chessboard:
     if c == 0:
-        cv.fillConvexPoly(
-            squares_overlay,
-            np.array(
-                [
-                    [
-                        [sq[0][0], sq[0][1]],
-                        [sq[1][0], sq[1][1]],
-                        [sq[2][0], sq[2][1]],
-                        [sq[3][0], sq[3][1]],
-                    ]
-                ],
-                dtype=np.int32,
-            ),
-            (0, 0, 255),
-        )
+        # cv.fillConvexPoly(
+        #     squares_overlay,
+        #     np.array(
+        #         [
+        #             [
+        #                 [sq[0][0], sq[0][1]],
+        #                 [sq[1][0], sq[1][1]],
+        #                 [sq[2][0], sq[2][1]],
+        #                 [sq[3][0], sq[3][1]],
+        #             ]
+        #         ],
+        #         dtype=np.int32,
+        #     ),
+        #     (0, 0, 255),
+        # )
         continue
 
     cv.drawMarker(im, (int(c[0]), int(c[1])), (255, 0, 255), cv.MARKER_DIAMOND, 15, 15)
 
-    cv.fillConvexPoly(
-        squares_overlay,
-        np.array(
-            [
-                [
-                    [sq[0][0], sq[0][1]],
-                    [sq[1][0], sq[1][1]],
-                    [sq[2][0], sq[2][1]],
-                    [sq[3][0], sq[3][1]],
-                ]
-            ],
-            dtype=np.int32,
-        ),
-        (255, 255, 0),
-    )
+    # cv.fillConvexPoly(
+    #     squares_overlay,
+    #     np.array(
+    #         [
+    #             [
+    #                 [sq[0][0], sq[0][1]],
+    #                 [sq[1][0], sq[1][1]],
+    #                 [sq[2][0], sq[2][1]],
+    #                 [sq[3][0], sq[3][1]],
+    #             ]
+    #         ],
+    #         dtype=np.int32,
+    #     ),
+    #     (255, 255, 0),
+    # )
 
 for idx, p in enumerate(boardKeypoints):
     cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 10, 5)
 
+b.draw(squares_overlay)
 im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
 
 cv.imwrite("board/" + image.name, im)
