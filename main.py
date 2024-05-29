@@ -7,6 +7,19 @@ from Perspective import Perspective
 from ChessPiece import ChessPiece
 from utils import getBoardKeypoints, convertToPx
 from ChessBoard import ChessBoard, ChessBoardCell, ChessBoardData, CellState
+from KeyManager import Key, keyManager
+from StateManager import stateManager
+
+
+stateManager["running"] = True
+
+
+def setRunningFalse():
+    stateManager["running"] = False
+
+
+keyManager.onKey(Key.Q, setRunningFalse)
+
 
 model = YOLO("models/best.pt")
 
@@ -42,6 +55,7 @@ if boardKeypoints is None:
     exit(0)
 
 im = cv.imread(str(image.resolve()))
+orig = im.copy()
 squares_overlay = im.copy()
 
 perspective = Perspective(im, boardKeypoints)
@@ -78,6 +92,11 @@ boardSquares = boardSquares.reshape((8, 8, 4, 2))
 
 chessboard = ChessBoard(boardKeypoints)
 
+keyManager.onKey(Key.KEY_DOWN, (chessboard, "goDown"))
+keyManager.onKey(Key.KEY_UP, (chessboard, "goUp"))
+keyManager.onKey(Key.KEY_LEFT, (chessboard, "goLeft"))
+keyManager.onKey(Key.KEY_RIGHT, (chessboard, "goRight"))
+
 for i, _ in enumerate(boardSquares):
     for j, square in enumerate(_):
 
@@ -99,20 +118,25 @@ for i, _ in enumerate(boardSquares):
                     cell.state = CellState.OCCUPIED
                     cellData.piece = piece
 
-
-for idx, p in enumerate(boardKeypoints):
-    cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 10, 5)
-
-chessboard.draw(squares_overlay)
-im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
-
-cv.imwrite("board/" + image.name, im)
-
 cv.namedWindow("markers", cv.WINDOW_GUI_EXPANDED)
-while True:
+
+while stateManager.getState("running"):
+    squares_overlay = orig.copy()
+    im = orig.copy()
+
+    chessboard.update()
+    chessboard.draw(squares_overlay)
+
+    for idx, p in enumerate(boardKeypoints):
+        cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 10, 5)
+
+    im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
+
     cv.imshow("markers", im)
-    if cv.waitKey(100) == ord("q"):
-        break
+    key = cv.waitKey(100)
+
+    if key != -1:
+        keyManager.processKey(key)
 
 print("Press any key to exit...")
 cv.waitKey(0)
