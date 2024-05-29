@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
-from ChessPiece import ChessPiece
+from ChessPiece import ChessPiece, PieceType
+from StateManager import stateManager
 
 
 class CellState:
@@ -8,6 +9,7 @@ class CellState:
     OCCUPIED = 1
     SELECTED = 2
     CAPTURABLE = 3
+    MOVEABLE = 4
 
 
 class ChessBoardCell:
@@ -27,6 +29,8 @@ class ChessBoardCell:
             color = (255, 0, 0)
         elif self.state == CellState.CAPTURABLE:
             color = (0, 0, 255)
+        elif self.state == CellState.MOVEABLE:
+            color = (255, 255, 0)
 
         cv.fillConvexPoly(
             image,
@@ -97,3 +101,121 @@ class ChessBoard:
 
     def getBoardData(self, i, j) -> ChessBoardData | None:
         return self.data[i][j] if isinstance(self.data[i][j], ChessBoardData) else None
+
+    def goUp(self):
+        cur_pos = stateManager.getState("current_position")
+        if cur_pos[0] > 0:
+            cur_pos[0] -= 1
+            stateManager["current_position"] = cur_pos
+
+    def goDown(self):
+        cur_pos = stateManager.getState("current_position")
+        if cur_pos[0] < 7:
+            cur_pos[0] += 1
+            stateManager["current_position"] = cur_pos
+
+    def goLeft(self):
+        cur_pos = stateManager.getState("current_position")
+        if cur_pos[1] > 0:
+            cur_pos[1] -= 1
+            stateManager["current_position"] = cur_pos
+
+    def goRight(self):
+        cur_pos = stateManager.getState("current_position")
+        if cur_pos[1] < 7:
+            cur_pos[1] += 1
+            stateManager["current_position"] = cur_pos
+
+    def clear(self):
+        for i in self.data:
+            for data in i:
+                data.cell.setState(
+                    CellState.EMPTY if data.piece is None else CellState.OCCUPIED
+                )
+
+    def handleSelected(self):
+        pos = stateManager.getState("current_position")
+        selectedCell: ChessBoardData = self.data[pos[0]][pos[1]]
+        selectedCell.cell.setState(CellState.SELECTED)
+
+        if selectedCell.piece is not None:
+            if selectedCell.piece.type == PieceType.QUEEN:
+                if pos[0] + 1 < 7:
+                    for i in range(pos[0] + 1, 8, 1):
+                        aux = self.data[i][pos[1]]
+                        if aux.piece is not None:
+                            if aux.piece.color == selectedCell.piece.color:
+                                break
+                            else:
+                                aux.cell.setState(CellState.CAPTURABLE)
+                                break
+                        else:
+                            aux.cell.setState(CellState.MOVEABLE)
+                if pos[0] - 1 > 0:
+                    for i in range(pos[0] - 1, -1, -1):
+                        aux = self.data[i][pos[1]]
+                        if aux.piece is not None:
+                            if aux.piece.color == selectedCell.piece.color:
+                                break
+                            else:
+                                aux.cell.setState(CellState.CAPTURABLE)
+                                break
+                        else:
+                            aux.cell.setState(CellState.MOVEABLE)
+
+                if pos[1] + 1 < 7:
+                    for i in range(pos[1] + 1, 8, 1):
+                        aux = self.data[pos[0]][i]
+                        if aux.piece is not None:
+                            if aux.piece.color == selectedCell.piece.color:
+                                break
+                            else:
+                                aux.cell.setState(CellState.CAPTURABLE)
+                                break
+                        else:
+                            aux.cell.setState(CellState.MOVEABLE)
+
+                if pos[1] - 1 > 0:
+                    for i in range(pos[1] - 1, -1, -1):
+                        aux = self.data[pos[0]][i]
+                        if aux.piece is not None:
+                            if aux.piece.color == selectedCell.piece.color:
+                                break
+                            else:
+                                aux.cell.setState(CellState.CAPTURABLE)
+                                break
+                        else:
+                            aux.cell.setState(CellState.MOVEABLE)
+                p1, p2 = pos[0] + 1, pos[1] + 1
+                while p1 < 8 and p2 < 8:
+                    aux = self.data[p1][p2]
+                    if aux.piece is not None:
+                        if aux.piece.color == selectedCell.piece.color:
+                            break
+                        else:
+                            aux.cell.setState(CellState.CAPTURABLE)
+                            break
+                    else:
+                        aux.cell.setState(CellState.MOVEABLE)
+                    p1 += 1
+                    p2 += 1
+
+                p1, p2 = pos[0] - 1, pos[1] - 1
+                while p1 > 0 and p2 > 0:
+                    aux = self.data[p1][p2]
+                    if aux.piece is not None:
+                        if aux.piece.color == selectedCell.piece.color:
+                            break
+                        else:
+                            aux.cell.setState(CellState.CAPTURABLE)
+                            break
+                    else:
+                        aux.cell.setState(CellState.MOVEABLE)
+                    p1 -= 1
+                    p2 -= 1
+
+    def update(self):
+        self.clear()
+        self.handleSelected()
+        pos = stateManager.getState("current_position")
+        print(pos)
