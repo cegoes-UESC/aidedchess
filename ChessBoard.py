@@ -214,6 +214,34 @@ class ChessBoard:
                     p1 -= 1
                     p2 -= 1
 
+                p1, p2 = pos[0] + 1, pos[1] - 1
+                while p1 < 8 and p2 > 0:
+                    aux = self.data[p1][p2]
+                    if aux.piece is not None:
+                        if aux.piece.color == selectedCell.piece.color:
+                            break
+                        else:
+                            aux.cell.setState(CellState.CAPTURABLE)
+                            break
+                    else:
+                        aux.cell.setState(CellState.MOVEABLE)
+                    p1 += 1
+                    p2 -= 1
+
+                p1, p2 = pos[0] - 1, pos[1] + 1
+                while p1 > 0 and p2 < 8:
+                    aux = self.data[p1][p2]
+                    if aux.piece is not None:
+                        if aux.piece.color == selectedCell.piece.color:
+                            break
+                        else:
+                            aux.cell.setState(CellState.CAPTURABLE)
+                            break
+                    else:
+                        aux.cell.setState(CellState.MOVEABLE)
+                    p1 -= 1
+                    p2 += 1
+
     def update(self):
         self.clear()
         self.handleSelected()
