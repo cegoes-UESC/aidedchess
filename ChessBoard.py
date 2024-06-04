@@ -142,6 +142,10 @@ class ChessBoard:
             if selectedCell.piece.type == PieceType.QUEEN:
                 self.checkDiagonalMove(pos, selectedCell)
                 self.checkSideMove(pos, selectedCell)
+            elif selectedCell.piece.type == PieceType.BISHOP:
+                self.checkDiagonalMove(pos, selectedCell)
+            elif selectedCell.piece.type == PieceType.ROOK:
+                self.checkSideMove(pos, selectedCell)
 
     def update(self):
         self.clear()
@@ -165,7 +169,7 @@ class ChessBoard:
             p2 += 1
 
         p1, p2 = pos[0] - 1, pos[1] - 1
-        while p1 > 0 and p2 > 0:
+        while p1 > -1 and p2 > -1:
             aux = self.data[p1][p2]
             if aux.piece is not None:
                 if aux.piece.color == selectedCell.piece.color:
@@ -179,7 +183,7 @@ class ChessBoard:
             p2 -= 1
 
         p1, p2 = pos[0] + 1, pos[1] - 1
-        while p1 < 8 and p2 > 0:
+        while p1 < 8 and p2 > -1:
             aux = self.data[p1][p2]
             if aux.piece is not None:
                 if aux.piece.color == selectedCell.piece.color:
@@ -193,7 +197,7 @@ class ChessBoard:
             p2 -= 1
 
         p1, p2 = pos[0] - 1, pos[1] + 1
-        while p1 > 0 and p2 < 8:
+        while p1 > -1 and p2 < 8:
             aux = self.data[p1][p2]
             if aux.piece is not None:
                 if aux.piece.color == selectedCell.piece.color:
