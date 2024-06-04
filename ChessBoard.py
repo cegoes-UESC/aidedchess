@@ -146,6 +146,8 @@ class ChessBoard:
                 self.checkDiagonalMove(pos, selectedCell)
             elif selectedCell.piece.type == PieceType.ROOK:
                 self.checkSideMove(pos, selectedCell)
+            elif selectedCell.piece.type == PieceType.KNIGHT:
+                self.checkKnightMove(pos, selectedCell)
 
     def update(self):
         self.clear()
@@ -257,3 +259,45 @@ class ChessBoard:
                         break
                 else:
                     aux.cell.setState(CellState.MOVEABLE)
+
+    def checkKnightPosition(self, x: int, y: int, selectedCell: ChessBoardData):
+        aux = self.data[x][y]
+        if aux.piece is not None:
+            if aux.piece.color != selectedCell.piece.color:
+                aux.cell.setState(CellState.CAPTURABLE)
+        else:
+            aux.cell.setState(CellState.MOVEABLE)
+
+    def checkKnightMove(self, pos: tuple[int, int], selectedCell: ChessBoardData):
+
+        p1, p2 = pos[0] + 2, pos[1] + 1
+        if p1 < 8 and p2 < 8:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] + 1, pos[1] + 2
+        if p1 < 8 and p2 < 8:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] - 2, pos[1] + 1
+        if p1 > -1 and p2 < 8:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] - 1, pos[1] + 2
+        if p1 > -1 and p2 < 8:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] + 2, pos[1] - 1
+        if p1 < 8 and p2 > -1:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] + 1, pos[1] - 2
+        if p1 < 8 and p2 > -1:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] - 2, pos[1] - 1
+        if p1 > -1 and p2 > -1:
+            self.checkKnightPosition(p1, p2, selectedCell)
+
+        p1, p2 = pos[0] - 1, pos[1] - 2
+        if p1 > -1 and p2 > -1:
+            self.checkKnightPosition(p1, p2, selectedCell)
