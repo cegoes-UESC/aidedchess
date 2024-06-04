@@ -127,9 +127,6 @@ while stateManager.getState("running"):
     chessboard.update()
     chessboard.draw(squares_overlay)
 
-    for idx, p in enumerate(boardKeypoints):
-        cv.drawMarker(im, (int(p[0]), int(p[1])), (0, 0, 255), cv.MARKER_CROSS, 10, 5)
-
     im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
 
     cv.imshow("markers", im)

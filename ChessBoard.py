@@ -83,21 +83,19 @@ class ChessBoard:
                     if r.piece is not None:
                         r.piece.draw(image)
 
-        # cv.fillConvexPoly(
-        #     image,
-        #     np.array(
-        #         [
-        #             [
-        #                 [self.points[0][0], self.points[0][1]],
-        #                 [self.points[1][0], self.points[1][1]],
-        #                 [self.points[2][0], self.points[2][1]],
-        #                 [self.points[3][0], self.points[3][1]],
-        #             ]
-        #         ],
-        #         dtype=np.int32,
-        #     ),
-        #     (0, 0, 255),
-        # )
+        for idx, p in enumerate(self.points):
+            if idx in [0, 1]:
+                color = (0, 0, 255)
+            else:
+                color = (255, 0, 0)
+            cv.drawMarker(
+                image,
+                (int(p[0]), int(p[1])),
+                color,
+                cv.MARKER_CROSS,
+                20,
+                10,
+            )
 
     def getBoardData(self, i, j) -> ChessBoardData | None:
         return self.data[i][j] if isinstance(self.data[i][j], ChessBoardData) else None
