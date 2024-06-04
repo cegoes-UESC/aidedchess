@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from ChessPiece import ChessPiece, PieceType
+from ChessPiece import ChessPiece, PieceType, PieceColor
 from StateManager import stateManager
 
 
@@ -150,6 +150,8 @@ class ChessBoard:
                 self.checkKnightMove(pos, selectedCell)
             elif selectedCell.piece.type == PieceType.KING:
                 self.checkKingMove(pos, selectedCell)
+            elif selectedCell.piece.type == PieceType.PAWN:
+                self.checkPawnMove(pos, selectedCell)
 
     def update(self):
         self.clear()
@@ -336,3 +338,30 @@ class ChessBoard:
         p1, p2 = pos[0] - 1, pos[1] + 1
         if p1 > -1 and p2 < 8:
             self.checkPosition(p1, p2, selectedCell)
+
+    def checkPawnMove(self, pos: tuple[int, int], selectedCell: ChessBoardData):
+
+        if selectedCell.piece.color == PieceColor.WHITE:
+            increment = 2 if pos[0] == 1 else 1
+            dir = 1
+        else:
+            increment = -2 if pos[0] == 6 else -1
+            dir = -1
+
+        for i in range(pos[0] + dir, pos[0] + dir + increment, dir):
+            aux = self.data[i][pos[1]]
+            if aux.piece is not None:
+                break
+            else:
+                aux.cell.setState(CellState.MOVEABLE)
+
+        p1, p2 = pos[0] + dir, pos[1] + 1
+        if (p1 > -1 and p1 < 8) and p2 < 8:
+            aux = self.data[p1][p2]
+            if aux.piece is not None and aux.piece.color != selectedCell.piece.color:
+                aux.cell.setState(CellState.CAPTURABLE)
+        p1, p2 = pos[0] + dir, pos[1] - 1
+        if (p1 > -1 and p1 < 8) and p2 > -1:
+            aux = self.data[p1][p2]
+            if aux.piece is not None and aux.piece.color != selectedCell.piece.color:
+                aux.cell.setState(CellState.CAPTURABLE)
