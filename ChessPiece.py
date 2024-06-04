@@ -101,13 +101,16 @@ class ChessPiece:
         return f"Empty Piece"
 
     def draw(self, image) -> None:
+
+        color = (255, 255, 255) if self.color == PieceColor.BLACK else (0, 0, 0)
+
         cv.drawMarker(
             image,
             (int(self.x), int(self.y)),
-            (0, 0, 255),
+            color,
             cv.MARKER_DIAMOND,
-            20,
             15,
+            10,
         )
 
         if self.showKeypoints:
