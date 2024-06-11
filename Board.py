@@ -220,7 +220,7 @@ class Board:
                 self.hough.rho,
                 self.hough.theta,
                 self.hough.threshold,
-                min_theta=0,  # Antes: -np.pi / 2
+                min_theta=-np.pi / 2,
                 max_theta=np.pi / 2,
             )
 
