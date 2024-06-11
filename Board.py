@@ -2,7 +2,8 @@ import numpy as np
 import cv2 as cv
 from math import sqrt, pow
 import random
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
 
 
@@ -155,6 +156,8 @@ class Board:
 
     debug = False
 
+    name = None
+
     def __init__(self, debug=False) -> None:
         self.canny = Canny()
         self.hough = Hough()
@@ -220,8 +223,8 @@ class Board:
                 self.hough.rho,
                 self.hough.theta,
                 self.hough.threshold,
-                min_theta=-np.pi / 2,
-                max_theta=np.pi / 2,
+                min_theta=0,
+                max_theta=np.pi,
             )
 
             if lines is None or len(lines) < 2:
@@ -245,6 +248,10 @@ class Board:
                     ],
                     axis=0,
                 )
+
+            sns.scatterplot(x=l[:, 1], y=l[:, 0])
+            plt.savefig(f"results_images/lines-{self.name}.png")
+            plt.cla()
 
             lines = l
             imgLines = np.zeros((500, 500, 3))
@@ -445,3 +452,6 @@ class Board:
                 break
 
         return resize, centers, (hs, vs), squares
+
+    def setImageName(self, name: str) -> None:
+        self.name = name
