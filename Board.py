@@ -259,6 +259,7 @@ class Board:
                 Line.printLine(imgLines, ll)
 
             length = len(lines)
+
             diffMatrix = np.zeros((length, length))
             for i, a in enumerate(lines):
                 for j, b in enumerate(lines):
@@ -301,9 +302,6 @@ class Board:
             vs = Line.getBestLines(v)
 
             print(len(hs), len(vs))
-
-            # print(list(h[0] for h in hs))
-            # print(list(v[0] for v in vs))
 
             verticals, horizontals = np.zeros((500, 500, 3)), np.zeros((500, 500, 3))
 
@@ -450,6 +448,16 @@ class Board:
 
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
+
+        hs = np.array(hs)
+        sns.scatterplot(x=hs[:, 1], y=hs[:, 0])
+        plt.savefig(f"results_images/horizontal-{self.name}.png")
+        plt.cla()
+
+        vs = np.array(vs)
+        sns.scatterplot(x=vs[:, 1], y=vs[:, 0])
+        plt.savefig(f"results_images/vertical-{self.name}.png")
+        plt.cla()
 
         return resize, centers, (hs, vs), squares
 
