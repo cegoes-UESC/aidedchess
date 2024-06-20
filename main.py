@@ -23,7 +23,7 @@ keyManager.onKey(Key.Q, setRunningFalse)
 
 model = YOLO("models/final.pt")
 
-image = Path("datasets/chess/images/train/IMG_3399.JPG")
+image = Path("datasets/chess/images/train/test.JPG")
 
 prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
@@ -38,15 +38,15 @@ for c, k in zip(classes, keypoints):
 
 # -> DEBUG <-
 
-# kpts = getBoardKeypoints(image)
-# im = cv.imread(str(image.resolve()))
-# kkk = convertToPx(im, kpts)
+kpts = getBoardKeypoints(image)
+im = cv.imread(str(image.resolve()))
+kkk = convertToPx(im, kpts)
 
-# kkk = list(map(float, kkk))
-# kkk = np.array(kkk)
-# kkk = kkk.reshape((4, 2))
-# kkk = np.float32(kkk.tolist())
-# boardKeypoints = kkk
+kkk = list(map(float, kkk))
+kkk = np.array(kkk)
+kkk = kkk.reshape((4, 2))
+kkk = np.float32(kkk.tolist())
+boardKeypoints = kkk
 
 # -> DEBUG <-
 
@@ -118,6 +118,18 @@ for c, k in zip(classes, keypoints):
 boardSquares = np.array(boardSquares)
 boardSquares = boardSquares.reshape((8, 8, 4, 2))
 
+to_draw = boardSquares.reshape((64, 4, 2))
+
+points = orig.copy()
+
+for d in to_draw:
+    for s in d:
+        cv.drawMarker(
+            points, (int(s[0]), int(s[1])), (0, 0, 255), cv.MARKER_DIAMOND, 20, 15
+        )
+
+cv.imwrite("results_images/points-original.png", points)
+
 chessboard = ChessBoard(boardKeypoints)
 
 keyManager.onKey(Key.KEY_DOWN, (chessboard, "goDown"))
@@ -147,6 +159,8 @@ for i, _ in enumerate(boardSquares):
                     cellData.piece = piece
 
 cv.namedWindow("markers", cv.WINDOW_GUI_EXPANDED)
+
+chessboard.drawPrediction(orig.copy())
 
 while stateManager.getState("running"):
     squares_overlay = orig.copy()

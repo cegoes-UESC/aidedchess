@@ -205,17 +205,24 @@ class Board:
     def setImage(self, image) -> None:
         self.image = image
 
+    def saveImage(self, name: str, image) -> None:
+        cv.imwrite(f"results_images/{name}.png", image)
+
     def process(self):
         if self.image is None:
             raise Exception("Image not set")
 
         while True:
             resize = cv.resize(self.image, (self.SIZE, self.SIZE))
+
+            res = resize.copy()
+
             gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
 
             blur = cv.GaussianBlur(
                 gray, (self.gaussian.k_size, self.gaussian.k_size), self.gaussian.sigma
             )
+
             edges = cv.Canny(blur, self.canny.low, self.canny.high)
 
             lines = cv.HoughLinesWithAccumulator(
@@ -249,9 +256,9 @@ class Board:
                     axis=0,
                 )
 
-            sns.scatterplot(x=l[:, 1], y=l[:, 0])
-            plt.savefig(f"results_images/lines-{self.name}.png")
-            plt.cla()
+            # sns.scatterplot(x=l[:, 1], y=l[:, 0])
+            # plt.savefig(f"results_images/lines-{self.name}.png")
+            # plt.cla()
 
             lines = l
             imgLines = np.zeros((500, 500, 3))
@@ -300,6 +307,10 @@ class Board:
             bestLines = np.zeros((500, 500, 3))
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
+
+            del hs[9]
+            del vs[10]
+            del vs[9]
 
             print(len(hs), len(vs))
 
@@ -436,6 +447,19 @@ class Board:
             grad = np.gradient(angles)
 
             if self.debug:
+
+                if cv.waitKey(100) == ord("s"):
+                    self.saveImage("canny", edges)
+                    self.saveImage("resize", res)
+                    self.saveImage("lines", imgLines)
+                    self.saveImage("vertical-horizontal", coloredLines)
+                    self.saveImage("best-vh-lines", bestLines)
+                    self.saveImage("intersection", inter)
+                    self.saveImage("vertical", verticals)
+                    self.saveImage("horizontal", horizontals)
+                    self.saveImage("squares", final_square)
+                    self.saveImage("result", resize)
+
                 cv.imshow("Canny", edges)
                 cv.imshow("Lines", imgLines)
                 cv.imshow("Vertical-Horizontal", coloredLines)
@@ -449,15 +473,15 @@ class Board:
             if cv.waitKey(100) == ord("q") or not self.debug:
                 break
 
-        hs = np.array(hs)
-        sns.scatterplot(x=hs[:, 1], y=hs[:, 0])
-        plt.savefig(f"results_images/horizontal-{self.name}.png")
-        plt.cla()
+        # hs = np.array(hs)
+        # sns.scatterplot(x=hs[:, 1], y=hs[:, 0])
+        # plt.savefig(f"results_images/horizontal-{self.name}.png")
+        # plt.cla()
 
-        vs = np.array(vs)
-        sns.scatterplot(x=vs[:, 1], y=vs[:, 0])
-        plt.savefig(f"results_images/vertical-{self.name}.png")
-        plt.cla()
+        # vs = np.array(vs)
+        # sns.scatterplot(x=vs[:, 1], y=vs[:, 0])
+        # plt.savefig(f"results_images/vertical-{self.name}.png")
+        # plt.cla()
 
         return resize, centers, (hs, vs), squares
 
