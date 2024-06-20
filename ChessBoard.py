@@ -74,6 +74,18 @@ class ChessBoard:
     def addData(self, i, j, data):
         self.data[i][j] = data
 
+    def drawPrediction(self, image):
+        for idx, p in enumerate(self.points):
+            cv.drawMarker(
+                image,
+                (int(p[0]), int(p[1])),
+                (0, 0, 255),
+                cv.MARKER_CROSS,
+                60,
+                25,
+            )
+        cv.imwrite("results_images/board-prediction.png", image)
+
     def draw(self, image) -> None:
 
         for l in self.data:
