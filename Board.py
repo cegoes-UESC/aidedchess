@@ -106,7 +106,7 @@ class Canny:
 
 class Hough:
     rho = 1
-    theta = np.pi / 180
+    theta = np.pi / 360
     threshold = 100
 
     def setRho(self, value):
@@ -117,7 +117,7 @@ class Hough:
     def setTheta(self, value):
         if value <= 0:
             value = 1
-        self.theta = value * np.pi / 180
+        self.theta = value * np.pi / 360
 
     def setThreshold(self, value):
         if value <= 0:
@@ -230,8 +230,6 @@ class Board:
                 self.hough.rho,
                 self.hough.theta,
                 self.hough.threshold,
-                min_theta=0,
-                max_theta=np.pi,
             )
 
             if lines is None or len(lines) < 2:
@@ -240,13 +238,18 @@ class Board:
             l = np.empty((0, 7))
             for ll in lines:
                 rho, theta, _ = ll[0]
+                if rho < 0:
+                    rho = -rho
+                    theta = theta - np.pi
                 coords = Line.getLineCoords(rho, theta)
 
                 l = np.append(
                     l,
                     [
                         [
-                            *ll[0],
+                            rho,
+                            theta,
+                            _,
                             coords[0][0],
                             coords[0][1],
                             coords[1][0],
@@ -289,13 +292,19 @@ class Board:
                     diffMatrix[i, j] = abs(diff)
 
             cluster = AgglomerativeClustering(
-                metric="precomputed", linkage="single"
+                metric="precomputed",
+                linkage="single",
             ).fit(diffMatrix)
 
             labels = cluster.labels_
 
             h = lines[labels == 0]
             v = lines[labels == 1]
+
+            if h[:, 1].mean() < v[:, 1].mean():
+                aux = h
+                h = v
+                v = aux
 
             coloredLines = np.zeros((500, 500, 3))
             for line in h:
@@ -307,10 +316,6 @@ class Board:
             bestLines = np.zeros((500, 500, 3))
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
-
-            del hs[9]
-            del vs[10]
-            del vs[9]
 
             print(len(hs), len(vs))
 
