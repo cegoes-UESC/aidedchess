@@ -4,7 +4,7 @@ from math import sqrt, pow
 import random
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering, DBSCAN
 
 
 class Line:
@@ -280,20 +280,19 @@ class Board:
                     else:
                         diff = theta2 - theta1
 
-                    diff = abs(diff)
-                    ninety = np.pi / 2
+                    # diff = abs(diff)
+                    # ninety = np.pi / 2
 
-                    if ninety > diff:
-                        diff = ninety - diff
-                    else:
-                        diff = diff - ninety
-                    diff = ninety - diff
+                    # if ninety > diff:
+                    #     diff = ninety - diff
+                    # else:
+                    #     diff = diff - ninety
+                    # diff = ninety - diff
 
-                    diffMatrix[i, j] = abs(diff)
+                    diffMatrix[i, j] = diff
 
-            cluster = AgglomerativeClustering(
+            cluster = DBSCAN(
                 metric="precomputed",
-                linkage="single",
             ).fit(diffMatrix)
 
             labels = cluster.labels_
