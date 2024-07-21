@@ -4,7 +4,7 @@ from math import sqrt, pow
 import random
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.cluster import AgglomerativeClustering, DBSCAN
+from sklearn.cluster import AgglomerativeClustering
 
 
 class Line:
@@ -291,14 +291,18 @@ class Board:
 
                     diffMatrix[i, j] = diff
 
-            cluster = DBSCAN(
+            cluster = AgglomerativeClustering(
                 metric="precomputed",
+                linkage="average",
             ).fit(diffMatrix)
 
             labels = cluster.labels_
 
             h = lines[labels == 0]
             v = lines[labels == 1]
+
+            if len(h) == 0 or len(v) == 0:
+                raise "No vertical or horizontal lines"
 
             if h[:, 1].mean() < v[:, 1].mean():
                 aux = h
@@ -316,8 +320,6 @@ class Board:
             hs = Line.getBestLines(h)
             vs = Line.getBestLines(v)
 
-            print(len(hs), len(vs))
-
             verticals, horizontals = np.zeros((500, 500, 3)), np.zeros((500, 500, 3))
 
             middleHorizontal = (0, 0, 0, 0, 250, 500, 250)
@@ -332,12 +334,10 @@ class Board:
             hs_np = np.array(hs)
             vs_np = np.array(vs)
 
-            hs_np = np.hstack((hs_np, np.zeros((hs_np.shape[0], 3), dtype=hs_np.dtype)))
-            vs_np = np.hstack((vs_np, np.zeros((vs_np.shape[0], 3), dtype=vs_np.dtype)))
+            hs_np = np.hstack((hs_np, np.zeros((hs_np.shape[0], 4), dtype=hs_np.dtype)))
+            vs_np = np.hstack((vs_np, np.zeros((vs_np.shape[0], 4), dtype=vs_np.dtype)))
 
             for line in hs_np:
-                Line.printLine(bestLines, line)
-                Line.printLine(resize, line)
                 center = Line.getIntersectionPoint(middleVertical, line)
                 if center is not None:
                     line[7] = int(center[0])
@@ -350,8 +350,6 @@ class Board:
                     )
 
             for line in vs_np:
-                Line.printLine(bestLines, line, (255, 0, 0))
-                Line.printLine(resize, line, (255, 0, 0))
                 center = Line.getIntersectionPoint(middleHorizontal, line)
                 if center is not None:
                     line[7] = int(center[0])
@@ -363,14 +361,48 @@ class Board:
                         )
                     )
 
+            horizontals_before = horizontals.copy()
+            verticals_before = verticals.copy()
+
+            for line in hs_np:
+                Line.printLine(horizontals_before, line, (255, 255, 255))
+
+            for line in vs_np:
+                Line.printLine(verticals_before, line, (255, 255, 255))
+
             hs_np = hs_np[hs_np[:, 9].argsort()]
             vs_np = vs_np[vs_np[:, 9].argsort()]
 
+            hs_shape, vs_shape = hs_np.shape, vs_np.shape
+
+            if hs_shape[0] > 9:
+                diff_h = hs_shape[0] - 9
+                gh = np.gradient(hs_np[:, 9])
+                hs_np[:, 10] = gh
+                hs_np = hs_np[hs_np[:, 10].argsort()]
+                hs_np = hs_np[diff_h:]
+                hs_np = hs_np[hs_np[:, 9].argsort()]
+
+            if vs_shape[0] > 9:
+                diff_v = vs_shape[0] - 9
+                gv = np.gradient(vs_np[:, 9])
+                vs_np[:, 10] = gv
+                vs_np = vs_np[vs_np[:, 10].argsort()]
+                vs_np = vs_np[diff_v:]
+                vs_np = vs_np[vs_np[:, 9].argsort()]
+
             for line in hs_np:
+                Line.printLine(bestLines, line)
+                Line.printLine(resize, line)
                 Line.printLine(horizontals, line, (255, 255, 255))
 
             for line in vs_np:
+                Line.printLine(bestLines, line, (255, 0, 0))
+                Line.printLine(resize, line, (255, 0, 0))
                 Line.printLine(verticals, line, (255, 255, 255))
+
+            hs = hs_np.tolist()
+            vs = vs_np.tolist()
 
             inter = np.zeros((500, 500, 3))
             centers = []
@@ -380,11 +412,11 @@ class Board:
             for h_idx, h in enumerate(hs_np):
                 for v_idx, v in enumerate(vs_np):
                     center = Line.getIntersectionPoint(h, v)
-                    centers.append(center)
-
-                    inter_np[h_idx, v_idx] = [center[0], center[1]]
 
                     if center is not None:
+                        centers.append(center)
+
+                        inter_np[h_idx, v_idx] = [center[0], center[1]]
                         cv.drawMarker(
                             inter,
                             (int(center[0]), int(center[1])),
@@ -463,6 +495,8 @@ class Board:
                     self.saveImage("horizontal", horizontals)
                     self.saveImage("squares", final_square)
                     self.saveImage("result", resize)
+                    self.saveImage("bef-verticals", verticals_before)
+                    self.saveImage("bef-horizontal", horizontals_before)
 
                 cv.imshow("Canny", edges)
                 cv.imshow("Lines", imgLines)
@@ -475,17 +509,9 @@ class Board:
                 cv.imshow("Result", resize)
 
             if cv.waitKey(100) == ord("q") or not self.debug:
+                if len(hs) == 9 and len(vs) == 9:
+                    cv.imwrite("results_images/final/" + self.name, resize)
                 break
-
-        # hs = np.array(hs)
-        # sns.scatterplot(x=hs[:, 1], y=hs[:, 0])
-        # plt.savefig(f"results_images/horizontal-{self.name}.png")
-        # plt.cla()
-
-        # vs = np.array(vs)
-        # sns.scatterplot(x=vs[:, 1], y=vs[:, 0])
-        # plt.savefig(f"results_images/vertical-{self.name}.png")
-        # plt.cla()
 
         return resize, centers, (hs, vs), squares
 
