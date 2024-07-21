@@ -102,15 +102,15 @@ class ChessPiece:
 
     def draw(self, image) -> None:
 
-        color = (255, 255, 255) if self.color == PieceColor.BLACK else (0, 0, 0)
+        color = (0, 255, 255) if self.color == PieceColor.BLACK else (0, 255, 255)
 
         cv.drawMarker(
             image,
             (int(self.x), int(self.y)),
             color,
             cv.MARKER_DIAMOND,
+            20,
             15,
-            10,
         )
 
         if self.showKeypoints:
