@@ -11,6 +11,44 @@ from KeyManager import Key, keyManager
 from StateManager import stateManager
 
 
+def scale(boardKeypoints, scale=1.01):
+    p1, p3 = boardKeypoints[0], boardKeypoints[2]
+    p2, p4 = boardKeypoints[1], boardKeypoints[3]
+
+    l1, l2 = (0, 0, 0, p1[0], p1[1], p3[0], p3[1]), (
+        0,
+        0,
+        0,
+        p2[0],
+        p2[1],
+        p4[0],
+        p4[1],
+    )
+    center = Line.getIntersectionPoint(l1, l2)
+
+    def scale_vector(
+        point: tuple[int, int], reference: tuple[int, int]
+    ) -> tuple[int, int]:
+
+        vector = point[0] - reference[0], point[1] - reference[1]
+        vector = vector[0] * scale, vector[1] * scale
+        return vector[0] + reference[0], vector[1] + reference[1]
+
+    v1, v2, v3, v4 = (
+        scale_vector(p1, center),
+        scale_vector(p2, center),
+        scale_vector(p3, center),
+        scale_vector(p4, center),
+    )
+
+    boardKeypoints[0] = v1
+    boardKeypoints[1] = v2
+    boardKeypoints[2] = v3
+    boardKeypoints[3] = v4
+
+    return boardKeypoints
+
+
 stateManager["running"] = True
 
 
@@ -55,48 +93,35 @@ if boardKeypoints is None:
     exit(0)
 
 
-p1, p3 = boardKeypoints[0], boardKeypoints[2]
-p2, p4 = boardKeypoints[1], boardKeypoints[3]
-
-l1, l2 = (0, 0, 0, p1[0], p1[1], p3[0], p3[1]), (0, 0, 0, p2[0], p2[1], p4[0], p4[1])
-center = Line.getIntersectionPoint(l1, l2)
-
-
-def scale_vector(point: tuple[int, int], reference: tuple[int, int]) -> tuple[int, int]:
-
-    vector = point[0] - reference[0], point[1] - reference[1]
-    vector = vector[0] * 1.04, vector[1] * 1.04
-    return vector[0] + reference[0], vector[1] + reference[1]
-
-
-v1, v2, v3, v4 = (
-    scale_vector(p1, center),
-    scale_vector(p2, center),
-    scale_vector(p3, center),
-    scale_vector(p4, center),
-)
-
-boardKeypoints[0] = v1
-boardKeypoints[1] = v2
-boardKeypoints[2] = v3
-boardKeypoints[3] = v4
-
 im = cv.imread(str(image.resolve()))
 orig = im.copy()
 squares_overlay = im.copy()
 
-perspective = Perspective(im, boardKeypoints)
-boardPerspective = perspective.apply()
+while True:
 
-board = Board(debug=True)
-board.setImage(boardPerspective)
-board.setImageName(image.name)
+    perspective = Perspective(im, boardKeypoints)
+    boardPerspective = perspective.apply()
 
-try:
-    boardResized, centers, (horizontal, vertical), squares = board.process()
-except:
-    print("It was not possible to process the board")
-    exit(0)
+    board = Board(debug=True)
+    board.setImage(boardPerspective)
+    board.setImageName(image.name)
+
+    try:
+        boardResized, centers, (horizontal, vertical), squares = board.process()
+
+        print(len(horizontal), len(vertical))
+
+        if len(horizontal) != 9 or len(vertical) != 9:
+            boardKeypoints = scale(boardKeypoints)
+            continue
+        else:
+            break
+
+    except Exception as e:
+        raise e
+        print(e)
+        print("It was not possible to process the board")
+        exit(0)
 
 boardSquares = perspective.undoPerspective(np.array(squares))
 
@@ -171,52 +196,54 @@ while stateManager.getState("running"):
 
     p = chessboard.points
 
-    cv.line(im, (int(p1[0]), int(p1[1])), (int(p3[0]), int(p3[1])), (255, 0, 0), 10)
+    # cv.line(im, (int(p1[0]), int(p1[1])), (int(p3[0]), int(p3[1])), (255, 0, 0), 10)
 
-    cv.line(im, (int(p2[0]), int(p2[1])), (int(p4[0]), int(p4[1])), (255, 0, 0), 10)
+    # cv.line(im, (int(p2[0]), int(p2[1])), (int(p4[0]), int(p4[1])), (255, 0, 0), 10)
 
-    cv.line(
-        im,
-        (int(v1[0]), int(v1[1])),
-        (int(center[0]), int(center[1])),
-        (0, 0, 255),
-        15,
-    )
+    # cv.line(
+    #     im,
+    #     (int(v1[0]), int(v1[1])),
+    #     (int(center[0]), int(center[1])),
+    #     (0, 0, 255),
+    #     15,
+    # )
 
-    cv.line(
-        im,
-        (int(v2[0]), int(v2[1])),
-        (int(center[0]), int(center[1])),
-        (0, 0, 255),
-        15,
-    )
+    # cv.line(
+    #     im,
+    #     (int(v2[0]), int(v2[1])),
+    #     (int(center[0]), int(center[1])),
+    #     (0, 0, 255),
+    #     15,
+    # )
 
-    cv.line(
-        im,
-        (int(v3[0]), int(v3[1])),
-        (int(center[0]), int(center[1])),
-        (0, 0, 255),
-        15,
-    )
+    # cv.line(
+    #     im,
+    #     (int(v3[0]), int(v3[1])),
+    #     (int(center[0]), int(center[1])),
+    #     (0, 0, 255),
+    #     15,
+    # )
 
-    cv.line(
-        im,
-        (int(v4[0]), int(v4[1])),
-        (int(center[0]), int(center[1])),
-        (0, 0, 255),
-        15,
-    )
+    # cv.line(
+    #     im,
+    #     (int(v4[0]), int(v4[1])),
+    #     (int(center[0]), int(center[1])),
+    #     (0, 0, 255),
+    #     15,
+    # )
 
-    cv.drawMarker(
-        im,
-        (int(center[0]), int(center[1])),
-        (0, 255, 0),
-        cv.MARKER_DIAMOND,
-        15,
-        10,
-    )
+    # cv.drawMarker(
+    #     im,
+    #     (int(center[0]), int(center[1])),
+    #     (0, 255, 0),
+    #     cv.MARKER_DIAMOND,
+    #     15,
+    #     10,
+    # )
 
     im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
+
+    cv.imwrite("results_images/squares-centroids.png", im)
 
     cv.imshow("markers", im)
     key = cv.waitKey(100)
