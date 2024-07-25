@@ -227,7 +227,7 @@ class ChessBoard:
             p2 += 1
 
     def checkSideMove(self, pos: tuple[int, int], selectedCell: ChessBoardData):
-        if pos[0] + 1 < 7:
+        if pos[0] + 1 < 8:
             for i in range(pos[0] + 1, 8, 1):
                 aux = self.data[i][pos[1]]
                 if aux.piece is not None:
@@ -238,7 +238,7 @@ class ChessBoard:
                         break
                 else:
                     aux.cell.setState(CellState.MOVEABLE)
-        if pos[0] - 1 > 0:
+        if pos[0] - 1 > -1:
             for i in range(pos[0] - 1, -1, -1):
                 aux = self.data[i][pos[1]]
                 if aux.piece is not None:
@@ -250,7 +250,7 @@ class ChessBoard:
                 else:
                     aux.cell.setState(CellState.MOVEABLE)
 
-        if pos[1] + 1 < 7:
+        if pos[1] + 1 < 8:
             for i in range(pos[1] + 1, 8, 1):
                 aux = self.data[pos[0]][i]
                 if aux.piece is not None:
@@ -262,7 +262,7 @@ class ChessBoard:
                 else:
                     aux.cell.setState(CellState.MOVEABLE)
 
-        if pos[1] - 1 > 0:
+        if pos[1] - 1 > -1:
             for i in range(pos[1] - 1, -1, -1):
                 aux = self.data[pos[0]][i]
                 if aux.piece is not None:
