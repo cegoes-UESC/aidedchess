@@ -61,7 +61,7 @@ keyManager.onKey(Key.Q, setRunningFalse)
 
 model = YOLO("models/final.pt")
 
-image = Path("datasets/chess/images/train/test.JPG")
+image = Path("datasets/chess/images/val/IMG_3460.JPG")
 
 prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
@@ -74,17 +74,21 @@ for c, k in zip(classes, keypoints):
         boardKeypoints = np.float32(k.tolist())
         break
 
+DEBUG: bool = False
+
 # -> DEBUG <-
 
-kpts = getBoardKeypoints(image)
-im = cv.imread(str(image.resolve()))
-kkk = convertToPx(im, kpts)
+if DEBUG:
 
-kkk = list(map(float, kkk))
-kkk = np.array(kkk)
-kkk = kkk.reshape((4, 2))
-kkk = np.float32(kkk.tolist())
-boardKeypoints = kkk
+    kpts = getBoardKeypoints(image)
+    im = cv.imread(str(image.resolve()))
+    kkk = convertToPx(im, kpts)
+
+    kkk = list(map(float, kkk))
+    kkk = np.array(kkk)
+    kkk = kkk.reshape((4, 2))
+    kkk = np.float32(kkk.tolist())
+    boardKeypoints = kkk
 
 # -> DEBUG <-
 
@@ -102,7 +106,7 @@ while True:
     perspective = Perspective(im, boardKeypoints)
     boardPerspective = perspective.apply()
 
-    board = Board(debug=True)
+    board = Board(debug=DEBUG)
     board.setImage(boardPerspective)
     board.setImageName(image.name)
 
