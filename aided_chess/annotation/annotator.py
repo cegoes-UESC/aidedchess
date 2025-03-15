@@ -1,8 +1,9 @@
-import PIL
 from typing import List
-from cvat_sdk import models
+
+import PIL
 from ultralytics import YOLO
-from cvat_sdk import make_client
+
+from cvat_sdk import models, make_client
 import cvat_sdk.auto_annotation as cvataa
 
 
@@ -50,17 +51,9 @@ class AnnotShapes:
         ]
 
 
-import sys
-
-try:
-    taskId = sys.argv[1]
-except:
-    print("Unable to read task ID")
-    exit()
-
-
-with make_client(
-    host="http://localhost", port=8080, credentials=("almir", "1234")
-) as client:
-    print(f"Running AUTO ANNOTATION on TASK {taskId}")
-    cvataa.annotate_task(client, int(taskId), AnnotShapes(), clear_existing=True)
+def auto_annotate(task_id):
+    with make_client(
+        host="http://localhost", port=8080, credentials=("almir", "1234")
+    ) as client:
+        print(f"Running AUTO ANNOTATION on TASK {task_id}")
+        cvataa.annotate_task(client, int(task_id), AnnotShapes(), clear_existing=True)
