@@ -1,4 +1,5 @@
 import optuna
+
 from ultralytics import YOLO
 
 
@@ -38,22 +39,23 @@ def objective(trial):
         hsv_h=0,
         erasing=0,
         augment=False,
-        **args
+        **args,
     )
     metrics = model.val(data="chess.yaml")
 
     return metrics.fitness
 
 
-storage = optuna.storages.JournalStorage(
-    optuna.storages.JournalFileStorage("./optuna.log"),
-)
+def tune():
+    storage = optuna.storages.JournalStorage(
+        optuna.storages.JournalFileStorage("./optuna.log"),
+    )
 
-study = optuna.create_study(
-    direction="maximize",
-    study_name="chess-optune",
-    storage=storage,
-    load_if_exists=True,
-)
+    study = optuna.create_study(
+        direction="maximize",
+        study_name="chess-optune",
+        storage=storage,
+        load_if_exists=True,
+    )
 
-study.optimize(objective, n_trials=1)
+    study.optimize(objective, n_trials=1)
