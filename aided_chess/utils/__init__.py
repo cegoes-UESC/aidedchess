@@ -1,4 +1,3 @@
 from .dataset_splitter import split_datasets as split_datasets
-import utils as utils
 from .class_distribution import get_class_distribution as get_class_distribution
 from .integrity_checker import check_integrity as check_integrity

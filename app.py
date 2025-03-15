@@ -52,7 +52,7 @@ def scale(boardKeypoints, factor=1.01):
     return boardKeypoints
 
 
-model = YOLO("models/final.pt")
+model = YOLO("pose_models/final.pt")
 
 images = list(Path("datasets/chess/images/val").glob("*"))
 

@@ -66,7 +66,7 @@ def setRunningFalse():
 key_manager.onKey(Key.Q, setRunningFalse)
 
 
-model = YOLO("models/final.pt")
+model = YOLO("pose_models/final.pt")
 
 image = Path("datasets/chess/images/val/IMG_3460.JPG")
 
