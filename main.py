@@ -3,9 +3,9 @@ import numpy as np
 from board import Board, Line
 from pathlib import Path
 from ultralytics import YOLO
-from perspective import Perspective
+from aided_chess.models.perspective import Perspective
 from chess_piece import ChessPiece
-from utils import getBoardKeypoints, convertToPx
+from aided_chess.utils.utils import getBoardKeypoints, convertToPx
 from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
 from key_manager import Key, keyManager
 from state_manager import stateManager

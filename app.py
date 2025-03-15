@@ -3,7 +3,7 @@ import numpy as np
 from board import Board, Line
 from pathlib import Path
 from ultralytics import YOLO
-from perspective import Perspective
+from aided_chess.models.perspective import Perspective
 import time
 from chess_piece import ChessPiece
 from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
