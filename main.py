@@ -1,14 +1,21 @@
+from pathlib import Path
+
 import cv2 as cv
 import numpy as np
-from board import Board, Line
-from pathlib import Path
 from ultralytics import YOLO
-from aided_chess.models.perspective import Perspective
-from chess_piece import ChessPiece
+
+from aided_chess.models import (
+    Perspective,
+    ChessPiece,
+    ChessBoard,
+    ChessBoardCell,
+    ChessBoardData,
+    CellState,
+    Board,
+)
+from aided_chess.models.board import Line
 from aided_chess.utils.utils import getBoardKeypoints, convertToPx
-from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
-from key_manager import Key, keyManager
-from state_manager import stateManager
+from aided_chess.managers import Key, key_manager, state_manager
 
 
 def scale(boardKeypoints, scale=1.01):
@@ -49,14 +56,14 @@ def scale(boardKeypoints, scale=1.01):
     return boardKeypoints
 
 
-stateManager["running"] = True
+state_manager["running"] = True
 
 
 def setRunningFalse():
-    stateManager["running"] = False
+    state_manager["running"] = False
 
 
-keyManager.onKey(Key.Q, setRunningFalse)
+key_manager.onKey(Key.Q, setRunningFalse)
 
 
 model = YOLO("models/final.pt")
@@ -161,10 +168,10 @@ cv.imwrite("results_images/points-original.png", points)
 
 chessboard = ChessBoard(boardKeypoints)
 
-keyManager.onKey(Key.KEY_DOWN, (chessboard, "goDown"))
-keyManager.onKey(Key.KEY_UP, (chessboard, "goUp"))
-keyManager.onKey(Key.KEY_LEFT, (chessboard, "goLeft"))
-keyManager.onKey(Key.KEY_RIGHT, (chessboard, "goRight"))
+key_manager.onKey(Key.KEY_DOWN, (chessboard, "goDown"))
+key_manager.onKey(Key.KEY_UP, (chessboard, "goUp"))
+key_manager.onKey(Key.KEY_LEFT, (chessboard, "goLeft"))
+key_manager.onKey(Key.KEY_RIGHT, (chessboard, "goRight"))
 
 for i, _ in enumerate(boardSquares):
     for j, square in enumerate(_):
@@ -191,7 +198,7 @@ cv.namedWindow("markers", cv.WINDOW_GUI_EXPANDED)
 
 chessboard.drawPrediction(orig.copy())
 
-while stateManager.getState("running"):
+while state_manager.getState("running"):
     squares_overlay = orig.copy()
     im = orig.copy()
 
@@ -253,7 +260,7 @@ while stateManager.getState("running"):
     key = cv.waitKey(100)
 
     if key != -1:
-        keyManager.processKey(key)
+        key_manager.processKey(key)
 
 print("Press any key to exit...")
 cv.waitKey(0)
