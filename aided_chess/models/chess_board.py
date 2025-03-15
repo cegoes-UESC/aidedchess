@@ -1,7 +1,8 @@
 import cv2 as cv
 import numpy as np
-from chess_piece import ChessPiece, PieceType, PieceColor
-from state_manager import stateManager
+
+from .chess_piece import ChessPiece, PieceType, PieceColor
+from aided_chess.managers import state_manager
 
 
 class CellState:
@@ -75,7 +76,7 @@ class ChessBoard:
         self.data[i][j] = data
 
     def drawPrediction(self, image):
-        for idx, p in enumerate(self.points):
+        for _, p in enumerate(self.points):
             cv.drawMarker(
                 image,
                 (int(p[0]), int(p[1])),
@@ -88,8 +89,8 @@ class ChessBoard:
 
     def draw(self, image) -> None:
 
-        for l in self.data:
-            for r in l:
+        for c in self.data:
+            for r in c:
                 if isinstance(r, ChessBoardData):
                     r.cell.draw(image)
                     if r.piece is not None:
@@ -113,28 +114,28 @@ class ChessBoard:
         return self.data[i][j] if isinstance(self.data[i][j], ChessBoardData) else None
 
     def goUp(self):
-        cur_pos = stateManager.getState("current_position")
+        cur_pos = state_manager.getState("current_position")
         if cur_pos[0] > 0:
             cur_pos[0] -= 1
-            stateManager["current_position"] = cur_pos
+            state_manager["current_position"] = cur_pos
 
     def goDown(self):
-        cur_pos = stateManager.getState("current_position")
+        cur_pos = state_manager.getState("current_position")
         if cur_pos[0] < 7:
             cur_pos[0] += 1
-            stateManager["current_position"] = cur_pos
+            state_manager["current_position"] = cur_pos
 
     def goLeft(self):
-        cur_pos = stateManager.getState("current_position")
+        cur_pos = state_manager.getState("current_position")
         if cur_pos[1] > 0:
             cur_pos[1] -= 1
-            stateManager["current_position"] = cur_pos
+            state_manager["current_position"] = cur_pos
 
     def goRight(self):
-        cur_pos = stateManager.getState("current_position")
+        cur_pos = state_manager.getState("current_position")
         if cur_pos[1] < 7:
             cur_pos[1] += 1
-            stateManager["current_position"] = cur_pos
+            state_manager["current_position"] = cur_pos
 
     def clear(self):
         for i in self.data:
@@ -144,7 +145,7 @@ class ChessBoard:
                 )
 
     def handleSelected(self):
-        pos = stateManager.getState("current_position")
+        pos = state_manager.getState("current_position")
         selectedCell: ChessBoardData = self.data[pos[0]][pos[1]]
         selectedCell.cell.setState(CellState.SELECTED)
 
@@ -166,7 +167,7 @@ class ChessBoard:
     def update(self):
         self.clear()
         self.handleSelected()
-        pos = stateManager.getState("current_position")
+        pos = state_manager.getState("current_position")
         print(pos)
 
     def checkDiagonalMove(self, pos: tuple[int, int], selectedCell: ChessBoardData):

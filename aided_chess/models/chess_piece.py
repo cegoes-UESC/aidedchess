@@ -1,5 +1,5 @@
-import cv2 as cv
 from enum import Enum, IntEnum
+import cv2 as cv
 
 
 class PieceType(str, Enum):
@@ -98,7 +98,7 @@ class ChessPiece:
     def __str__(self) -> str:
         if self.color and self.type:
             return f"A {self.color.value} {self.type.value} at ({self.x}, {self.y})"
-        return f"Empty Piece"
+        return "Empty Piece"
 
     def draw(self, image) -> None:
 

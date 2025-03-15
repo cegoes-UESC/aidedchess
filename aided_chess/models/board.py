@@ -1,9 +1,11 @@
-import numpy as np
-import cv2 as cv
 from math import sqrt, pow
 import random
-import seaborn as sns
-import matplotlib.pyplot as plt
+
+import numpy as np
+import cv2 as cv
+
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
 
 
@@ -37,8 +39,8 @@ class Line:
 
         lines = lines[1:]
 
-        for l in lines:
-            rho, theta, acc = l[0], l[1], l[2]
+        for one_line in lines:
+            rho, theta, acc = one_line[0], one_line[1], one_line[2]
             theta = Angle.getFixedAngle(theta)
             it = bestLines.copy()
 
@@ -55,8 +57,8 @@ class Line:
                     else:
                         add = False
                         break
-            if add == True:
-                bestLines.append(l)
+            if add:
+                bestLines.append(one_line)
 
         return bestLines
 
@@ -235,7 +237,7 @@ class Board:
             if lines is None or len(lines) < 2:
                 raise ValueError("No lines detected")
 
-            l = np.empty((0, 7))
+            transformed_lines = np.empty((0, 7))
             for ll in lines:
                 rho, theta, _ = ll[0]
                 if rho < 0:
@@ -243,8 +245,8 @@ class Board:
                     theta = theta - np.pi
                 coords = Line.getLineCoords(rho, theta)
 
-                l = np.append(
-                    l,
+                transformed_lines = np.append(
+                    transformed_lines,
                     [
                         [
                             rho,
@@ -263,9 +265,9 @@ class Board:
             # plt.savefig(f"results_images/lines-{self.name}.png")
             # plt.cla()
 
-            lines = l
+            lines = transformed_lines
             imgLines = np.zeros((500, 500, 3))
-            for ll in l:
+            for ll in transformed_lines:
                 Line.printLine(imgLines, ll)
 
             length = len(lines)
@@ -478,9 +480,9 @@ class Board:
 
             final_square = cv.addWeighted(squares_overlay, 0.4, resize, 1 - 0.4, 0)
 
-            angles = l[:, 1]
+            angles = transformed_lines[:, 1]
             angles = np.sort(angles)
-            grad = np.gradient(angles)
+            # grad = np.gradient(angles)
 
             if self.debug:
 
