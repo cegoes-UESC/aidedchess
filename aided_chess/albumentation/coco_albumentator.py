@@ -11,7 +11,7 @@ import numpy as np
 from .albument import augment
 
 
-def process(path: str):
+def augment_coco(path: str):
 
     VAL_PROP = 0.2
 

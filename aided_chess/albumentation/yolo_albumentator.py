@@ -6,7 +6,7 @@ import cv2 as cv
 from .albument import augment
 
 
-def process():
+def augment_yolo():
 
     path = Path("datasets/chess")
 
