@@ -1,17 +1,19 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
-PATH = Path("datasets/albumented/")
 
-images, labels = Path(PATH / "images/train"), Path(PATH / "labels/train")
+def check_integrity():
+    PATH = Path("datasets/albumented/")
 
-images, labels = list(images.glob("*")), list(labels.glob("*"))
+    images, labels = Path(PATH / "images/train"), Path(PATH / "labels/train")
 
-print(len(images), len(labels))
+    images, labels = list(images.glob("*")), list(labels.glob("*"))
 
-labels_n = list(map(lambda x: x.name.split(".")[0], labels))
+    print(len(images), len(labels))
 
-for i in images:
-    if i.name.split(".")[0] not in labels_n:
-        os.remove(i.absolute())
-        print(i.name)
+    labels_n = list(map(lambda x: x.name.split(".")[0], labels))
+
+    for i in images:
+        if i.name.split(".")[0] not in labels_n:
+            os.remove(i.absolute())
+            print(i.name)

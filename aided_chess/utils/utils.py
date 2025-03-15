@@ -17,8 +17,8 @@ def getBoardKeypoints(image):
 
     kpts = []
 
-    for l in label_f:
-        _ = l.split(" ")
+    for label_in in label_f:
+        _ = label_in.split(" ")
         cls = _[0]
         if cls == "0":
             kpts = _[5:]
