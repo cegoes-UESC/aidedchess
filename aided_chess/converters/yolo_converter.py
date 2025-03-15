@@ -1,131 +1,19 @@
-import cv2 as cv
+import os
+import json
 from pathlib import Path
-import os, json
 
-BASE_DIR = Path("datasets/albumented")
-
-LABELS_PATH = BASE_DIR / "labels" / "train"
-IMAGES_PATH = BASE_DIR / "images" / "train"
-
-labels = os.listdir(str(LABELS_PATH.absolute()))
-images = os.listdir(str(IMAGES_PATH.absolute()))
-
-images = list(map(lambda i: i.split("."), images))
-
-LEN_IMAGES = len(images)
-
-data = {
-    "images": [],
-    "annotations": [],
-    "licenses": [{"name": "", "id": 0, "url": ""}],
-    "info": {
-        "contributor": "",
-        "date_created": "",
-        "description": "",
-        "url": "",
-        "version": "",
-        "year": "",
-    },
-    "categories": [
-        {
-            "id": 1,
-            "name": "board",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 6,
-            "name": "black-pawn",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 11,
-            "name": "white-pawn",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 16,
-            "name": "black-rook",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 21,
-            "name": "white-rook",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 26,
-            "name": "black-bishop",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 31,
-            "name": "white-bishop",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 36,
-            "name": "black-knight",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 41,
-            "name": "white-knight",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 46,
-            "name": "black-queen",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 51,
-            "name": "white-queen",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 56,
-            "name": "black-king",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-        {
-            "id": 61,
-            "name": "white-king",
-            "supercategory": "",
-            "keypoints": ["1", "2", "3", "4"],
-            "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
-        },
-    ],
-}
-
-image_id = 1
-ann_id = 1
+import cv2 as cv
 
 
-def add_annotations(id, label_name, h, w, ann_id):
+def add_annotations(
+    LABELS_PATH,
+    data,
+    id,
+    label_name,
+    h,
+    w,
+    ann_id,
+):
     path = LABELS_PATH / label_name
     file = open(path, "r")
     for line in file:
@@ -167,36 +55,158 @@ def add_annotations(id, label_name, h, w, ann_id):
     return ann_id
 
 
-for idx, label in enumerate(labels):
+def convert_from_yolo_to_coco():
+    BASE_DIR = Path("datasets/albumented")
 
-    print(f"=== Processing {idx+1}/{LEN_IMAGES} ===")
+    LABELS_PATH = BASE_DIR / "labels" / "train"
+    IMAGES_PATH = BASE_DIR / "images" / "train"
 
-    name = label.split(".")[0]
-    image = list(filter(lambda i: i[0] == name, images))[0]
+    labels = os.listdir(str(LABELS_PATH.absolute()))
+    images = os.listdir(str(IMAGES_PATH.absolute()))
 
-    image_name = ".".join(image)
-    image_path = IMAGES_PATH / image_name
+    images = list(map(lambda i: i.split("."), images))
 
-    image = cv.imread(str(image_path.absolute()), cv.IMREAD_COLOR)
-    h, w = image.shape[:2]
+    LEN_IMAGES = len(images)
 
-    data["images"].append(
-        {
-            "id": image_id,
-            "width": w,
-            "height": h,
-            "file_name": image_name,
-            "license": 0,
-            "flickr_url": "",
-            "coco_url": "",
-            "date_captured": 0,
+    data = {
+        "images": [],
+        "annotations": [],
+        "licenses": [{"name": "", "id": 0, "url": ""}],
+        "info": {
+            "contributor": "",
+            "date_created": "",
+            "description": "",
+            "url": "",
+            "version": "",
+            "year": "",
         },
-    )
-    ann_id = add_annotations(image_id, label, h, w, ann_id)
-    image_id = image_id + 1
+        "categories": [
+            {
+                "id": 1,
+                "name": "board",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 6,
+                "name": "black-pawn",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 11,
+                "name": "white-pawn",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 16,
+                "name": "black-rook",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 21,
+                "name": "white-rook",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 26,
+                "name": "black-bishop",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 31,
+                "name": "white-bishop",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 36,
+                "name": "black-knight",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 41,
+                "name": "white-knight",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 46,
+                "name": "black-queen",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 51,
+                "name": "white-queen",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 56,
+                "name": "black-king",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+            {
+                "id": 61,
+                "name": "white-king",
+                "supercategory": "",
+                "keypoints": ["1", "2", "3", "4"],
+                "skeleton": [[2, 3], [1, 2], [4, 1], [3, 4]],
+            },
+        ],
+    }
 
-out_path = Path("annotations/yolo")
+    image_id = 1
+    ann_id = 1
 
-out = open(str((out_path / "yolo-to-coco.json").absolute()), "w")
+    for idx, label in enumerate(labels):
+        print(f"=== Processing {idx+1}/{LEN_IMAGES} ===")
 
-json.dump(data, out)
+        name = label.split(".")[0]
+        image = list(filter(lambda i: i[0] == name, images))[0]
+
+        image_name = ".".join(image)
+        image_path = IMAGES_PATH / image_name
+
+        image = cv.imread(str(image_path.absolute()), cv.IMREAD_COLOR)
+        h, w = image.shape[:2]
+
+        data["images"].append(
+            {
+                "id": image_id,
+                "width": w,
+                "height": h,
+                "file_name": image_name,
+                "license": 0,
+                "flickr_url": "",
+                "coco_url": "",
+                "date_captured": 0,
+            },
+        )
+        ann_id = add_annotations(LABELS_PATH, data, image_id, label, h, w, ann_id)
+        image_id = image_id + 1
+
+    out_path = Path("annotations/yolo")
+
+    out = open(str((out_path / "yolo-to-coco.json").absolute()), "w")
+
+    json.dump(data, out)
