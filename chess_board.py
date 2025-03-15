@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
-from ChessPiece import ChessPiece, PieceType, PieceColor
-from StateManager import stateManager
+from chess_piece import ChessPiece, PieceType, PieceColor
+from state_manager import stateManager
 
 
 class CellState:

@@ -1,13 +1,13 @@
 import cv2 as cv
 import numpy as np
-from Board import Board, Line
+from board import Board, Line
 from pathlib import Path
 from ultralytics import YOLO
-from Perspective import Perspective
+from perspective import Perspective
 import time
-from ChessPiece import ChessPiece
-from ChessBoard import ChessBoard, ChessBoardCell, ChessBoardData, CellState
-from StateManager import stateManager
+from chess_piece import ChessPiece
+from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
+from state_manager import stateManager
 import os
 
 

@@ -1,14 +1,14 @@
 import cv2 as cv
 import numpy as np
-from Board import Board, Line
+from board import Board, Line
 from pathlib import Path
 from ultralytics import YOLO
-from Perspective import Perspective
-from ChessPiece import ChessPiece
+from perspective import Perspective
+from chess_piece import ChessPiece
 from utils import getBoardKeypoints, convertToPx
-from ChessBoard import ChessBoard, ChessBoardCell, ChessBoardData, CellState
-from KeyManager import Key, keyManager
-from StateManager import stateManager
+from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
+from key_manager import Key, keyManager
+from state_manager import stateManager
 
 
 def scale(boardKeypoints, scale=1.01):
