@@ -25,4 +25,4 @@ class StateManager:
         self.state[name] = value
 
 
-stateManager = StateManager()
+state_manager = StateManager()

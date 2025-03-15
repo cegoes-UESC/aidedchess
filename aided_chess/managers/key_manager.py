@@ -33,4 +33,4 @@ class KeyManager:
                     f()
 
 
-keyManager = KeyManager()
+key_manager = KeyManager()
