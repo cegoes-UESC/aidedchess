@@ -1,14 +1,16 @@
+import os
+import time
+from pathlib import Path
+
 import cv2 as cv
 import numpy as np
-from board import Board, Line
-from pathlib import Path
 from ultralytics import YOLO
+
+from aided_chess.models.board import Board, Line
 from aided_chess.models.perspective import Perspective
-import time
-from chess_piece import ChessPiece
-from chess_board import ChessBoard, ChessBoardCell, ChessBoardData, CellState
-from state_manager import stateManager
-import os
+from aided_chess.models import ChessPiece
+from aided_chess.models import ChessBoard, ChessBoardCell, ChessBoardData, CellState
+from aided_chess.managers import state_manager
 
 
 def scale(boardKeypoints, factor=1.01):
@@ -166,7 +168,6 @@ for image in images:
                                 cellData = chessboard.getBoardData(i, j)
                                 if cellData.piece is not None:
                                     piece_error += 1
-                                    # print("=> Celldata already has a Piece, ignoring")
                                     continue
                                 else:
                                     cell.state = CellState.OCCUPIED
@@ -180,9 +181,9 @@ for image in images:
                 for i in range(8):
                     for j in range(8):
                         im_draw = im.copy()
-                        cur_pos = stateManager.getState("current_position")
+                        cur_pos = state_manager.getState("current_position")
                         cur_pos = (i, j)
-                        stateManager.state["current_position"] = cur_pos
+                        state_manager.state["current_position"] = cur_pos
                         chessboard.update()
                         chessboard.draw(im_draw)
                         overlay = cv.addWeighted(im_draw, 0.4, im, 0.6, 0)
