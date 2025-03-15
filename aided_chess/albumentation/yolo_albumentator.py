@@ -1,7 +1,9 @@
-import cv2 as cv
 from pathlib import Path
 from time import time_ns
-from albument import augment
+
+import cv2 as cv
+
+from .albument import augment
 
 path = Path("datasets/chess")
 
@@ -39,7 +41,7 @@ for idx, im in enumerate(images):
 
     size = 0
 
-    for item_idx, l in enumerate(label_file):
+    for item_idx, label in enumerate(label_file):
         size = size + 1
         bboxes, keypoints = [], []
 
@@ -47,7 +49,7 @@ for idx, im in enumerate(images):
             targets["bboxes" + str(item_idx - 1)] = "bboxes"
             targets["keypoints" + str(item_idx - 1)] = "keypoints"
 
-        labels_content = l.split(" ")
+        labels_content = label.split(" ")
         _class = int(labels_content[0])
 
         points = list(map(float, labels_content[1:]))

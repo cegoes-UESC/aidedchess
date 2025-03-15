@@ -1,10 +1,12 @@
-import cv2 as cv
-import numpy as np
+import random
+import math
+import json
 from sys import argv
 from pathlib import Path
 from time import time_ns
-import random, math, json
-from albument import augment
+import cv2 as cv
+import numpy as np
+from .albument import augment
 
 VAL_PROP = 0.2
 
@@ -126,10 +128,10 @@ for im in images:
     kpts = kpts.reshape((len(classes), 4, 3))
 
     for j, g in enumerate(kpts):
-        for l, k in enumerate(g):
+        for m, k in enumerate(g):
             if k[2] != 0:
                 print(visibility[j])
-                kpts[j][l][2] = visibility[j][l]
+                kpts[j][m][2] = visibility[j][m]
 
     cv.imwrite(
         str(Path("datasets/albumented/images/train/" + out_name + ".jpg").absolute()),
