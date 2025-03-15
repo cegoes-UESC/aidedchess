@@ -196,8 +196,7 @@ for image in images:
                     end = time.time_ns()
                     times.append(end - start)
                     raise Exception("END")
-        except Exception as e:
-            # print(e)
+        except Exception:
             print("\t-> Error in process")
             error += 1
             errors.append(image.resolve())
