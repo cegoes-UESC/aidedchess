@@ -1,8 +1,8 @@
 __pycache__/
 .vscode/
-
+.venv
 runs
 conversion
-models
+pose_models
 datasets
 annotations
