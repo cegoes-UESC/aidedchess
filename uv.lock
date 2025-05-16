@@ -35,7 +35,7 @@ requires-dist = [
     { name = "dill", specifier = ">=0.3.9" },
     { name = "opencv-contrib-python", specifier = ">=4.11.0.86" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
-    { name = "ultralytics", specifier = ">=8.3.91" },
+    { name = "ultralytics", specifier = "==8.2.22" },
 ]
 
 [package.metadata.requires-dev]
@@ -1529,6 +1529,17 @@ wheels = [
 ]
 
 [[package]]
+name = "thop"
+version = "0.1.1.post2209072238"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "torch" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bb/0f/72beeab4ff5221dc47127c80f8834b4bcd0cb36f6ba91c0b1d04a1233403/thop-0.1.1.post2209072238-py3-none-any.whl", hash = "sha256:01473c225231927d2ad718351f78ebf7cffe6af3bed464c4f1ba1ef0f7cdda27", size = 15443 },
+]
+
+[[package]]
 name = "threadpoolctl"
 version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1601,6 +1612,9 @@ dependencies = [
     { name = "torch" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/3d/b7241abfa3e6651c6e00796f5de2bd1ce4d500bf5159bcbfeea47e711b93/torchvision-0.21.0-1-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:ff96666b94a55e802ea6796cabe788541719e6f4905fc59c380fed3517b6a64d", size = 2329320 },
+    { url = "https://files.pythonhosted.org/packages/52/5b/76ca113a853b19c7b1da761f8a72cb6429b3bd0bf932537d8df4657f47c3/torchvision-0.21.0-1-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:ffa2a16499508fe6798323e455f312c7c55f2a88901c9a7c0fb1efa86cf7e327", size = 2329878 },
+    { url = "https://files.pythonhosted.org/packages/4e/fe/5e193353706dab96fe73ae100d5a633ff635ce310e0d92f3bc2958d075b1/torchvision-0.21.0-1-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:7e9e9afa150e40cd2a8f0701c43cb82a8d724f512896455c0918b987f94b84a4", size = 2280711 },
     { url = "https://files.pythonhosted.org/packages/29/88/00c69db213ee2443ada8886ec60789b227e06bb869d85ee324578221a7f7/torchvision-0.21.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:110d115333524d60e9e474d53c7d20f096dbd8a080232f88dddb90566f90064c", size = 1784141 },
     { url = "https://files.pythonhosted.org/packages/be/a2/b0cedf0a411f1a5d75cfc0b87cde56dd1ddc1878be46a42c905cd8580220/torchvision-0.21.0-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:3891cd086c5071bda6b4ee9d266bb2ac39c998c045c2ebcd1e818b8316fb5d41", size = 7237719 },
     { url = "https://files.pythonhosted.org/packages/8c/a1/ee962ef9d0b2bf7a6f8b14cb95acb70e05cd2101af521032a09e43f8582f/torchvision-0.21.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:54454923a50104c66a9ab6bd8b73a11c2fc218c964b1006d5d1fe5b442c3dcb6", size = 14700617 },
@@ -1684,11 +1698,10 @@ wheels = [
 
 [[package]]
 name = "ultralytics"
-version = "8.3.91"
+version = "8.2.22"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "matplotlib" },
-    { name = "numpy" },
     { name = "opencv-python" },
     { name = "pandas" },
     { name = "pillow" },
@@ -1698,27 +1711,14 @@ dependencies = [
     { name = "requests" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "thop" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "tqdm" },
-    { name = "ultralytics-thop" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/85/d8829ec5834941e0f83ff4235e9262e6e55575a3cb28ed2681981eb6e6ed/ultralytics-8.3.91.tar.gz", hash = "sha256:81b7b7281a283b23f43d75a22d3dd125c7decfd57df105719d825268efe790ea", size = 817293 }
+sdist = { url = "https://files.pythonhosted.org/packages/db/55/ee1688f5d66d847c8158ec8e5b8993b7614e41df5de3110bf7dabdb5220b/ultralytics-8.2.22.tar.gz", hash = "sha256:1c1887a041d7d4a41d6f7e02913012f8e412972b06184d3a8b1712c457e1fedb", size = 673929 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/95/95/03a9eb60d56e0f9e7231ed848cd9efea97d23978093e9b71b352559c2838/ultralytics-8.3.91-py3-none-any.whl", hash = "sha256:9eb38f2a39589c95e74b911e9f4e214175111e486a7f3f5911da4cbb659578ce", size = 949197 },
-]
-
-[[package]]
-name = "ultralytics-thop"
-version = "2.0.14"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "torch" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/d8/e43a8bfcb03ff036119d098a7ea27be9f0adb715543ed6bd83b16cda83dc/ultralytics_thop-2.0.14.tar.gz", hash = "sha256:38ebfdbd3cd8dafdc3d26ec3a7d4f604fbeed5e69a74e61a48060b39736c945c", size = 28793 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/10/251f036b4c5d77249f9a119cc89dafe8745dc1ad1f1a5f06b6a3988ca454/ultralytics_thop-2.0.14-py3-none-any.whl", hash = "sha256:720b421e2459179fee21ec8f730d242a20774cd4b0a00a58d02351a39ec3881c", size = 26517 },
+    { url = "https://files.pythonhosted.org/packages/87/ac/fe69868ff03b9488504398018841edf9cd07bb77ce47aa32b1d13a8b52a5/ultralytics-8.2.22-py3-none-any.whl", hash = "sha256:5e1eafb9126855216c05749502a7e733c7c678d76d1c07a610c963f3a6dd3b96", size = 778419 },
 ]
 
 [[package]]

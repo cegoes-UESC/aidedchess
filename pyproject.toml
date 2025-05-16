@@ -9,10 +9,8 @@ dependencies = [
     "dill>=0.3.9",
     "opencv-contrib-python>=4.11.0.86",
     "scikit-learn>=1.6.1",
-    "ultralytics>=8.3.91",
+    "ultralytics==8.2.22",
 ]
 
 [dependency-groups]
-dev = [
-    "ipykernel>=6.29.5",
-]
+dev = ["ipykernel>=6.29.5"]
