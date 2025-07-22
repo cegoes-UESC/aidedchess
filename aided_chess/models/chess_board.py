@@ -22,7 +22,7 @@ class ChessBoardCell:
 
     def draw(self, image) -> None:
 
-        color = (255, 255, 255)
+        color = None
 
         if self.state == CellState.OCCUPIED:
             color = (255, 0, 255)
@@ -33,21 +33,22 @@ class ChessBoardCell:
         elif self.state == CellState.MOVEABLE:
             color = (0, 165, 255)
 
-        cv.fillConvexPoly(
-            image,
-            np.array(
-                [
+        if color is not None:
+            cv.fillConvexPoly(
+                image,
+                np.array(
                     [
-                        [self.points[0][0], self.points[0][1]],
-                        [self.points[1][0], self.points[1][1]],
-                        [self.points[2][0], self.points[2][1]],
-                        [self.points[3][0], self.points[3][1]],
-                    ]
-                ],
-                dtype=np.int32,
-            ),
-            color,
-        )
+                        [
+                            [self.points[0][0], self.points[0][1]],
+                            [self.points[1][0], self.points[1][1]],
+                            [self.points[2][0], self.points[2][1]],
+                            [self.points[3][0], self.points[3][1]],
+                        ]
+                    ],
+                    dtype=np.int32,
+                ),
+                color,
+            )
 
     def setState(self, state: CellState) -> None:
         self.state = state
