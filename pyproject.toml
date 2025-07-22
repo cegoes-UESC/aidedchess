@@ -9,8 +9,18 @@ dependencies = [
     "dill>=0.3.9",
     "opencv-contrib-python>=4.11.0.86",
     "scikit-learn>=1.6.1",
-    "ultralytics==8.2.22",
+    "ultralytics==8.2.14",
+    "torch==2.5.0",
 ]
 
 [dependency-groups]
 dev = ["ipykernel>=6.29.5"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]
