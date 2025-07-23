@@ -65,10 +65,9 @@ def setRunningFalse():
 
 key_manager.onKey(Key.Q, setRunningFalse)
 
-
 model = YOLO("pose_models/final.pt")
 
-image = Path("datasets/chess/images/val/IMG_3460.JPG")
+image = Path("datasets/chess/images/train/IMG_2831.JPG")
 
 prediction = model.predict(image.resolve(), verbose=False, save=False)[0]
 
@@ -252,7 +251,7 @@ while state_manager.getState("running"):
     #     10,
     # )
 
-    im = cv.addWeighted(squares_overlay, 0.4, im, 1 - 0.4, 0)
+    im = cv.addWeighted(squares_overlay, 0.5, im, 1 - 0.5, 0)
 
     cv.imwrite("results_images/squares-centroids.png", im)
 
