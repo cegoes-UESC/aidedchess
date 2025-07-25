@@ -80,7 +80,7 @@ for c, k in zip(classes, keypoints):
         boardKeypoints = np.float32(k.tolist())
         break
 
-DEBUG: bool = False
+DEBUG: bool = True
 
 # -> DEBUG <-
 
@@ -112,7 +112,7 @@ while True:
     perspective = Perspective(im, boardKeypoints)
     boardPerspective = perspective.apply()
 
-    board = Board(debug=DEBUG)
+    board = Board(debug=False)
     board.setImage(boardPerspective)
     board.setImageName(image.name)
 

@@ -115,15 +115,15 @@ class ChessPiece:
             15,
         )
 
-        # cv.putText(
-        #     image,
-        #     str(self.cls),
-        #     (center[0] - 15, center[1] - 20),
-        #     cv.FONT_HERSHEY_SIMPLEX,
-        #     3,
-        #     (255, 255, 255) if self.color == PieceColor.WHITE else (0, 0, 0),
-        #     thickness=7,
-        # )
+        cv.putText(
+            image,
+            str(self.cls),
+            (center[0] - 15, center[1] - 20),
+            cv.FONT_HERSHEY_SIMPLEX,
+            3,
+            (255, 255, 255) if self.color == PieceColor.WHITE else (0, 0, 0),
+            thickness=7,
+        )
 
         if self.showKeypoints:
             for p in self.points:
