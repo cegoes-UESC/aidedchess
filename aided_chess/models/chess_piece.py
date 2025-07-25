@@ -102,7 +102,7 @@ class ChessPiece:
 
     def draw(self, image) -> None:
 
-        color = (0, 255, 255) if self.color == PieceColor.BLACK else (0, 255, 255)
+        color = (0, 0, 0) if self.color == PieceColor.BLACK else (0, 255, 0)
 
         center = (int(self.x), int(self.y))
 
@@ -118,10 +118,10 @@ class ChessPiece:
         cv.putText(
             image,
             str(self.cls),
-            (center[0] - 15, center[1] - 20),
-            cv.FONT_HERSHEY_SIMPLEX,
+            (center[0] - 30, center[1] - 30),
+            cv.FONT_HERSHEY_DUPLEX,
             3,
-            (255, 255, 255) if self.color == PieceColor.WHITE else (0, 0, 0),
+            (0, 255, 0) if self.color == PieceColor.WHITE else (0, 0, 0),
             thickness=7,
         )
 

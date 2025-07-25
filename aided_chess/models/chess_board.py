@@ -27,11 +27,11 @@ class ChessBoardCell:
         if self.state == CellState.OCCUPIED:
             color = (255, 0, 255)
         elif self.state == CellState.SELECTED:
-            color = (255, 0, 0)
-        elif self.state == CellState.CAPTURABLE:
-            color = (0, 0, 255)
-        elif self.state == CellState.MOVEABLE:
-            color = (0, 165, 255)
+            color = (255, 0, 255)
+        # elif self.state == CellState.CAPTURABLE:
+        #     color = (0, 0, 255)
+        # elif self.state == CellState.MOVEABLE:
+        #     color = (0, 165, 255)
 
         if color is not None:
             cv.fillConvexPoly(
